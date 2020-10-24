@@ -1,4 +1,4 @@
-export ZSH="/home/dev/.oh-my-zsh"
+export ZSH="/home/ankit/.oh-my-zsh"
 ZSH_THEME="custom"
 DISABLE_UNTRACKED_FILES_DIRTY="true"
 plugins=(git)
