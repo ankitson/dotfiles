@@ -1,5 +1,5 @@
 # modified version of fletcherm
-PROMPT='%{$fg_no_bold[cyan]%}%n%{$fg_no_bold[magenta]%}•%{$fg_no_bold[green]%}%~%{$reset_color%} > '
+PROMPT='%{$fg_bold[blue]%}%n@%m%{$fg_no_bold[yellow]%}%~%{$reset_color%} > '
 RPROMPT='$(git_prompt_info)%{$fg_bold[grey]%}[%@]%{$reset_color%}'
 
 # git theming
