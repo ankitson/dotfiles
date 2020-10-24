@@ -1,7 +1,7 @@
 export ZSH="/home/ankit/.oh-my-zsh"
 ZSH_THEME="custom"
 DISABLE_UNTRACKED_FILES_DIRTY="true"
-plugins=(git)
+plugins=(git fzf)
 
 source $ZSH/oh-my-zsh.sh
 
