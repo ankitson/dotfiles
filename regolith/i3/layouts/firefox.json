@@ -1,0 +1,24 @@
+// vim:ts=4:sw=4:et
+{
+    "border": "pixel",
+    "current_border_width": 5,
+    "floating": "auto_off",
+    "fullscreen_mode": 1,
+    "geometry": {
+       "height": 1369,
+       "width": 1268,
+       "x": 0,
+       "y": 0
+    },
+    "name": "Mozilla Firefox",
+    "percent": 1,
+    "swallows": [
+       {
+          "class": "^Firefox$",
+          "instance": "^Navigator$",
+          "window_role": "^browser$"
+       }
+    ],
+    "type": "con"
+}
+

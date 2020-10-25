@@ -1,0 +1,19 @@
+i3-wm.client.focused.color.indicator: "#ff33cc"
+i3-wm.window.border.size: 5
+i3-wm.gaps.inner.size: 20
+
+i3-wm.bar.position: top
+
+! rofi.theme: ~/.config/regolith/styles/rofi.rasi
+rofi.font: SF Pro Display 18
+
+! gnome.gtk.theme: "Ayu"
+gnome.terminal.font: Fira Mono NF Regular 16
+gnome.wallpaper: /usr/share/backgrounds/pop/benjamin-voros-250200.jpg
+
+i3-wm.client.focused.color.child_border: "#1e88e5"
+
+i3-wm.program.notifications: /usr/bin/dunst
+
+// i3-wm.program.1: /usr/bin/firefox
+// i3-wm.program.2: /usr/bin/spotify

@@ -1,0 +1,24 @@
+// vim:ts=4:sw=4:et
+{
+    "border": "pixel",
+    "current_border_width": 5,
+    "floating": "auto_off",
+    "geometry": {
+       "height": 506,
+       "width": 802,
+       "x": 0,
+       "y": 0
+    },
+    "name": "base:4:bash - \"bash /home/ankitp\" ",
+    "percent": 1,
+    "swallows": [
+       {
+          "class": "^Gnome\\-terminal$",
+          "instance": "^gnome\\-terminal\\-server$",
+       // "title": "^base\\:4\\:bash\\ \\-\\ \\\"bash\\ \\/home\\/ankitp\\\"\\ $",
+       // "window_role": "^gnome\\-terminal\\-window\\-a295c45c\\-dea6\\-4c30\\-a03b\\-22b0ff2ff6ef$"
+       }
+    ],
+    "type": "con"
+}
+

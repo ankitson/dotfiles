@@ -1,0 +1,106 @@
+;==========================================================
+;
+;
+;   ██████╗  ██████╗ ██╗  ██╗   ██╗██████╗  █████╗ ██████╗
+;   ██╔══██╗██╔═══██╗██║  ╚██╗ ██╔╝██╔══██╗██╔══██╗██╔══██╗
+;   ██████╔╝██║   ██║██║   ╚████╔╝ ██████╔╝███████║██████╔╝
+;   ██╔═══╝ ██║   ██║██║    ╚██╔╝  ██╔══██╗██╔══██║██╔══██╗
+;   ██║     ╚██████╔╝███████╗██║   ██████╔╝██║  ██║██║  ██║
+;   ╚═╝      ╚═════╝ ╚══════╝╚═╝   ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝
+;
+;
+;   To learn more about how to configure Polybar
+;   go to https://github.com/polybar/polybar
+;
+;   The README contains a lot of information
+;
+;==========================================================
+
+
+include-file = ~/.config/polybar/settings.ini
+include-file = ~/.config/polybar/modules.ini
+
+;==========================================================
+
+[bar/top]
+monitor = ${env:MONITOR:}
+width = 100%
+height = 50
+offset-x = 0%
+offset-y = 0%
+top = true
+fixed-center = true
+line-size = 4
+
+override-redirect = false  
+
+background = ${colors.bg}
+foreground = ${colors.fg}
+underline = ${colors.primary}
+
+radius = 8
+
+border-top-size = 8
+border-bottom-size = 0
+border-left-size = 8
+border-right-size = 8
+
+border-color = #00000000
+
+padding-left = 0
+padding-right = 0
+
+;==========================================================
+
+font-0 = Fira Sans:size=18
+font-1 = FontAwesome:style=Regular;size=18
+font-2 = Font Awesome 5 Free:style=Solid;size=14
+font-3 = "Material Design Icons:size=14;4"
+font-4 = "Material Design Icons:size=18;4"
+font-5 = Fira Sans:size=20
+;font-0 = "SF Pro Display:pixelsize=10;1"
+;font-1 = "SF Pro Display:pixelsize=10;1"
+;font-2 = "SF Mono:pixelsize=12;2"
+;font-3 = "Material Icons:size=14;4"
+;font-4 = "Font Awesome 5 Brands:size=14;3"
+;font-5 = "Iosevka Nerd Font:style=Medium:size=16;3"
+
+;==========================================================
+
+modules-left = menu i3 
+modules-center = menu-apps term files browser code discord steam music settings
+modules-right = network volume cpu temperature memory date mypowerbutton
+
+module-margin-left = ${config.module-spacing}
+module-margin-right = ${config.module-spacing}
+
+tray-position = none
+tray-padding = 1
+
+;==========================================================
+
+wm-restack = i3
+
+; scroll-up = i3wm-wsnext
+; scroll-down = i3wm-wsprev
+
+cursor-click = pointer
+cursor-scroll = ns-resize
+
+;==========================================================
+
+[settings]
+screenchange-reload = true
+;compositing-background = xor
+;compositing-background = screen
+;compositing-foreground = source
+;compositing-border = over
+;pseudo-transparency = false
+
+;==========================================================
+
+[global/wm]
+margin-top = 5
+margin-bottom = 5
+
+; vim:ft=dosini
