@@ -25,7 +25,7 @@
 "   Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
 "   Plug 'tpope/vim-fireplace', { 'for': 'clojure' }
 "
-"   " Using a non-master branch
+"   " Using a non-default branch
 "   Plug 'rdnetto/YCM-Generator', { 'branch': 'stable' }
 "
 "   " Using a tagged release; wildcard allowed (requires git 1.9.2 or above)
@@ -106,7 +106,7 @@ if s:is_win && &shellslash
 else
   let s:me = resolve(expand('<sfile>:p'))
 endif
-let s:base_spec = { 'branch': 'master', 'frozen': 0 }
+let s:base_spec = { 'branch': '', 'frozen': 0 }
 let s:TYPE = {
 \   'string':  type(''),
 \   'list':    type([]),
@@ -115,6 +115,90 @@ let s:TYPE = {
 \ }
 let s:loaded = get(s:, 'loaded', {})
 let s:triggers = get(s:, 'triggers', {})
+
+function! s:isabsolute(dir) abort
+  return a:dir =~# '^/' || (has('win32') && a:dir =~? '^\%(\\\|[A-Z]:\)')
+endfunction
+
+function! s:git_dir(dir) abort
+  let gitdir = s:trim(a:dir) . '/.git'
+  if isdirectory(gitdir)
+    return gitdir
+  endif
+  if !filereadable(gitdir)
+    return ''
+  endif
+  let gitdir = matchstr(get(readfile(gitdir), 0, ''), '^gitdir: \zs.*')
+  if len(gitdir) && !s:isabsolute(gitdir)
+    let gitdir = a:dir . '/' . gitdir
+  endif
+  return isdirectory(gitdir) ? gitdir : ''
+endfunction
+
+function! s:git_origin_url(dir) abort
+  let gitdir = s:git_dir(a:dir)
+  let config = gitdir . '/config'
+  if empty(gitdir) || !filereadable(config)
+    return ''
+  endif
+  return matchstr(join(readfile(config)), '\[remote "origin"\].\{-}url\s*=\s*\zs\S*\ze')
+endfunction
+
+function! s:git_revision(dir) abort
+  let gitdir = s:git_dir(a:dir)
+  let head = gitdir . '/HEAD'
+  if empty(gitdir) || !filereadable(head)
+    return ''
+  endif
+
+  let line = get(readfile(head), 0, '')
+  let ref = matchstr(line, '^ref: \zs.*')
+  if empty(ref)
+    return line
+  endif
+
+  if filereadable(gitdir . '/' . ref)
+    return get(readfile(gitdir . '/' . ref), 0, '')
+  endif
+
+  if filereadable(gitdir . '/packed-refs')
+    for line in readfile(gitdir . '/packed-refs')
+      if line =~# ' ' . ref
+        return matchstr(line, '^[0-9a-f]*')
+      endif
+    endfor
+  endif
+
+  return ''
+endfunction
+
+function! s:git_local_branch(dir) abort
+  let gitdir = s:git_dir(a:dir)
+  let head = gitdir . '/HEAD'
+  if empty(gitdir) || !filereadable(head)
+    return ''
+  endif
+  let branch = matchstr(get(readfile(head), 0, ''), '^ref: refs/heads/\zs.*')
+  return len(branch) ? branch : 'HEAD'
+endfunction
+
+function! s:git_origin_branch(spec)
+  if len(a:spec.branch)
+    return a:spec.branch
+  endif
+
+  " The file may not be present if this is a local repository
+  let gitdir = s:git_dir(a:spec.dir)
+  let origin_head = gitdir.'/refs/remotes/origin/HEAD'
+  if len(gitdir) && filereadable(origin_head)
+    return matchstr(get(readfile(origin_head), 0, ''),
+                  \ '^ref: refs/remotes/origin/\zs.*')
+  endif
+
+  " The command may not return the name of a branch in detached HEAD state
+  let result = s:lines(s:system('git symbolic-ref --short HEAD', a:spec.dir))
+  return v:shell_error ? '' : result[-1]
+endfunction
 
 if s:is_win
   function! s:plug_call(fn, ...)
@@ -179,7 +263,7 @@ function! s:define_commands()
   endif
   if has('win32')
   \ && &shellslash
-  \ && (&shell =~# 'cmd\.exe' || &shell =~# 'powershell\.exe')
+  \ && (&shell =~# 'cmd\(\.exe\)\?$' || &shell =~# 'powershell\(\.exe\)\?$')
     return s:err('vim-plug does not support shell, ' . &shell . ', when shellslash is set.')
   endif
   if !has('nvim')
@@ -419,7 +503,7 @@ if s:is_win
     let batchfile = s:plug_tempname().'.bat'
     call writefile(s:wrap_cmds(a:cmd), batchfile)
     let cmd = plug#shellescape(batchfile, {'shell': &shell, 'script': 0})
-    if &shell =~# 'powershell\.exe'
+    if &shell =~# 'powershell\(\.exe\)\?$'
       let cmd = '& ' . cmd
     endif
     return [batchfile, cmd]
@@ -646,25 +730,25 @@ function! s:parse_options(arg)
     endif
     let opts.tag = a:arg
   elseif type == s:TYPE.dict
-    call extend(opts, a:arg)
     for opt in ['branch', 'tag', 'commit', 'rtp', 'dir', 'as']
-      if has_key(opts, opt)
-      \ && (type(opts[opt]) != s:TYPE.string || empty(opts[opt]))
+      if has_key(a:arg, opt)
+      \ && (type(a:arg[opt]) != s:TYPE.string || empty(a:arg[opt]))
         throw printf(opt_errfmt, opt, 'string')
       endif
     endfor
     for opt in ['on', 'for']
-      if has_key(opts, opt)
-      \ && type(opts[opt]) != s:TYPE.list
-      \ && (type(opts[opt]) != s:TYPE.string || empty(opts[opt]))
+      if has_key(a:arg, opt)
+      \ && type(a:arg[opt]) != s:TYPE.list
+      \ && (type(a:arg[opt]) != s:TYPE.string || empty(a:arg[opt]))
         throw printf(opt_errfmt, opt, 'string or list')
       endif
     endfor
-    if has_key(opts, 'do')
-      \ && type(opts.do) != s:TYPE.funcref
-      \ && (type(opts.do) != s:TYPE.string || empty(opts.do))
+    if has_key(a:arg, 'do')
+      \ && type(a:arg.do) != s:TYPE.funcref
+      \ && (type(a:arg.do) != s:TYPE.string || empty(a:arg.do))
         throw printf(opt_errfmt, 'do', 'string or funcref')
     endif
+    call extend(opts, a:arg)
     if has_key(opts, 'dir')
       let opts.dir = s:dirpath(s:plug_expand(opts.dir))
     endif
