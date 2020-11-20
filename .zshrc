@@ -13,3 +13,16 @@ export EDITOR='nvim'
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
+function ssh-init()
+{
+    /usr/bin/keychain id_rsa
+    [ -z "$HOSTNAME" ] && HOSTNAME=`/bin/uname -n`
+    [ -f $HOME/.keychain/$HOSTNAME-sh ] && . $HOME/.keychain/$HOSTNAME-sh
+}
+ 
+ssh-init
+
+export LD_LIBRARY_PATH=/usr/local/pgsql/lib
+export PATH=/usr/local/pgsql/bin:$PATH
+
+alias vim='nvim'
