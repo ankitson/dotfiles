@@ -1,7 +1,9 @@
 # modified version of fletcherm
-PROMPT='%{$fg_bold[blue]%}%n@%m%{$fg_no_bold[yellow]%}%~%{$reset_color%} > '
-RPROMPT='$(git_prompt_info)%{$fg_bold[grey]%}[%@]%{$reset_color%}'
+PROMPT='%{$fg_bold[red]%}%n@%m%{$fg_no_bold[yellow]%}%~%{$reset_color%} > '
+RPROMPT='                $(git_prompt_info)%{$fg_bold[grey]%}[%@]%{$reset_color%}'
 
+# term title
+ZSH_THEME_TERM_TAB_TITLE_IDLE="$(hostname): %15<..<%~%<<"
 # git theming
 ZSH_THEME_GIT_PROMPT_PREFIX="%{$fg_bold[blue]%}(%{$fg_no_bold[red]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX=""
