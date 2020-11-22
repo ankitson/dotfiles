@@ -3,3 +3,8 @@
 	name = Ankit Soni
 [core]
 	editor = vim
+[alias]
+  s = status
+  dc = diff --cached
+  lo = log --oneline -n 10
+  co = checkout
