@@ -1,4 +1,4 @@
-#!/bin/bash
+!/bin/bash
 
 set -x
 set -e
@@ -15,6 +15,9 @@ cp ./vim-plug/plug.vim ./nvim/autoload/
 
 #git
 ln -sr ./.gitconfig ~/.gitconfig
+
+#sqlite
+ln -sr ./.sqliterc ~/.sqliterc
 
 #ohmyzsh
 rm ~/.zshrc
