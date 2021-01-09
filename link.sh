@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 
 set -x
 set -e
@@ -19,7 +19,12 @@ ln -sr ./.gitconfig ~/.gitconfig
 #sqlite
 ln -sr ./.sqliterc ~/.sqliterc
 
+#bash
+rm ~/.bashrc
+ln -sr ./.bashrc ~/.bashrc
+ln -sr ./.alias.sh ~/.alias.sh
+
 #ohmyzsh
-rm ~/.zshrc
-ln -sr ./.zshrc ~/.zshrc
-ln -sr ./custom.zsh-theme ~/.oh-my-zsh/themes/custom.zsh-theme
+#rm ~/.zshrc
+#ln -sr ./.zshrc ~/.zshrc
+#ln -sr ./custom.zsh-theme ~/.oh-my-zsh/themes/custom.zsh-theme
