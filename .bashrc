@@ -113,8 +113,6 @@ if ! shopt -oq posix; then
 fi
 
 export EDITOR=vim
-export PATH="/home/ankit/homeserver/bin/":$PATH
-alias dc="sudo docker-compose -f /home/ankit/homeserver/docker-compose.yaml"
 
 source ./.alias.sh
 source /usr/share/doc/fzf/examples/key-bindings.bash
