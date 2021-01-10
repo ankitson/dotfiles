@@ -31,6 +31,9 @@ set expandtab
 set foldmethod=indent
 set foldlevel=99
 
+" Listchars
+set list listchars=tab:»·,trail:·,nbsp:·
+
 " ALE - https://github.com/dense-analysis/ale
 let g:ale_linters = {
 \ "javascript": ['eslint'],
