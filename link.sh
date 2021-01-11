@@ -20,7 +20,9 @@ ln -sr ./.gitconfig ~/.gitconfig
 ln -sr ./.sqliterc ~/.sqliterc
 
 #bash
-rm ~/.bashrc
+if [[ -f "~/.bashrc" ]]; then
+  rm ~/.bashrc
+fi
 ln -sr ./.bashrc ~/.bashrc
 ln -sr ./.alias.sh ~/.alias.sh
 
