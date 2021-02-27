@@ -4,6 +4,7 @@
 [core]
 	editor = vim
 [alias]
+  a = add
   ap = add -p
   cm = commit
   co = checkout
