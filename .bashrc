@@ -114,6 +114,6 @@ fi
 
 export EDITOR=vim
 
-source ./.alias.sh
+source ~/.alias.sh
 source /usr/share/doc/fzf/examples/key-bindings.bash
 source /usr/share/doc/fzf/examples/completion.bash
