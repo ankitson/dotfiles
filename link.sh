@@ -4,6 +4,9 @@ set -x
 set -e
 
 #tmux
+if [[ -f "~/.tmux.conf" ]]; then
+  mv ~/.tmux.conf ~/.tmux.conf.old
+fi
 ln -sr ./.tmux.conf ~/.tmux.conf
 
 #nvim

@@ -112,8 +112,14 @@ if ! shopt -oq posix; then
   fi
 fi
 
+# MY CUSTOMIZATIONS BELOW #
 export EDITOR=vim
 
-source ~/.alias.sh
+# sync bash history between instances - https://web.archive.org/web/20170104092506/http://briancarper.net/blog/248.html
+shopt -s histappend # dont clear history file
+export PROMPT_COMMAND="history -a; history -n" # update the history file and read it before every command
+
+
+source ./.alias.sh
 source /usr/share/doc/fzf/examples/key-bindings.bash
 source /usr/share/doc/fzf/examples/completion.bash
