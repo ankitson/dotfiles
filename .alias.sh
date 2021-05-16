@@ -8,3 +8,9 @@ alias g="git"
 #This allows sudo to work with aliases.
 alias sudo="sudo "
 alias dc="sudo docker-compose -f /home/ankit/homeserver/docker-compose.yaml"
+
+# "cd.. 5" will cd up 5 levels
+function cd_up() {
+  cd $(printf "%0.0s../" $(seq 1 $1));
+}
+alias 'cd..'='cd_up'
