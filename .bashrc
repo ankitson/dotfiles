@@ -120,6 +120,6 @@ shopt -s histappend # dont clear history file
 export PROMPT_COMMAND="history -a; history -n" # update the history file and read it before every command
 
 
-source ./.alias.sh
+source $HOME/.alias.sh
 source /usr/share/doc/fzf/examples/key-bindings.bash
 source /usr/share/doc/fzf/examples/completion.bash
