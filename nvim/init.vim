@@ -32,7 +32,7 @@ set foldmethod=indent
 set foldlevel=99
 
 " Listchars
-set list listchars=tab:»·,trail:·,nbsp:·
+set list listchars=tab:»·,trail:·,nbsp:·,space:·
 
 " ALE - https://github.com/dense-analysis/ale
 let g:ale_linters = {
