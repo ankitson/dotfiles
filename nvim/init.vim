@@ -14,6 +14,7 @@ if (has('termguicolors'))
   set termguicolors
 endif
 
+let g:material_terminal_italics = 1
 let g:material_theme_style = 'darker'
 let g:airline_theme = 'material'
 colorscheme material
@@ -26,6 +27,9 @@ set number
 set tabstop=2
 set shiftwidth=2
 set expandtab
+
+" disable autoindenting #comments in YAML
+autocmd BufNewFile,BufReadPost * if &filetype == "yaml" | set expandtab shiftwidth=2 indentkeys-=0# | endif
 
 " Enable folding
 set foldmethod=indent
@@ -58,7 +62,6 @@ let g:airline#extensions#ale#enabled = 1
 
 " Shortcuts
 let mapleader=","
-
   " Reload conf with ,sc
   nnoremap <silent> <leader>sc :source $MYVIMRC<CR>
 
@@ -72,10 +75,9 @@ let mapleader=","
   map <silent> <leader><right> <C-w><right>
   map <silent> <leader>l <C-w><right>
 
-  " NERDTree
+  " NERDTree with leader<m>
   nnoremap <silent> <leader>m :NERDTreeToggle<CR>
 
-  command! -bang UserFiles call fzf#vim#files('~', <bang>0)
-
   " open fzf with Ctrl+P
+  command! -bang UserFiles call fzf#vim#files('../', <bang>0)
   nnoremap <C-p> :UserFiles<Cr>
