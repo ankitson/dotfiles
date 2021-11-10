@@ -2,7 +2,7 @@
 	email = ankitsoni9@gmail.com
 	name = Ankit Soni
 [core]
-	editor = vim
+	editor = nvim
 [alias]
   a = add
   ap = add -p
