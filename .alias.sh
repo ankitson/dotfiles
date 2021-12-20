@@ -14,3 +14,8 @@ function cd_up() {
   cd $(printf "%0.0s../" $(seq 1 $1));
 }
 alias 'cd..'='cd_up'
+
+function cargo_test_stdout() {
+  cargo test -- --nocapture
+}
+alias 'ct'='cargo_test_stdout'

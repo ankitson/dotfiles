@@ -1,16 +1,21 @@
 [user]
 	email = ankitsoni9@gmail.com
 	name = Ankit Soni
+[init]
+  defaultBranch = main
 [core]
 	editor = vim
+  excludesfile = ~/.gitignore_global
 [alias]
   a = add
   ap = add -p
+  bl = branch --list
   cm = commit
   co = checkout
   d = diff
   dc = diff --cached
-  lo = log --oneline -n 10
+  lo = log --pretty='%C(yellow)%h %C(cyan)%cd %Cblue%aN%C(auto)%d %Creset%s' --graph --date-order --date=human #'format:"%Y-%m-%d %H:%M"'
   s = status
   ps = push
   pl = pull
+  us = reset HEAD --

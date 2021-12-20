@@ -18,6 +18,7 @@ cp ./vim-plug/plug.vim ./nvim/autoload/
 
 #git
 ln -sr ./.gitconfig ~/.gitconfig
+ln -sr ./.gitignore_global ~/.gitignore_global
 
 #sqlite
 ln -sr ./.sqliterc ~/.sqliterc
@@ -28,6 +29,7 @@ if [[ -f "~/.bashrc" ]]; then
 fi
 ln -sr ./.bashrc ~/.bashrc
 ln -sr ./.alias.sh ~/.alias.sh
+
 
 #ohmyzsh
 #rm ~/.zshrc

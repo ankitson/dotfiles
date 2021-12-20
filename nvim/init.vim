@@ -7,8 +7,9 @@ Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 Plug 'preservim/nerdtree'
 Plug 'kaicataldo/material.vim'
-
 call plug#end()
+
+set encoding=utf-8
 
 if (has('termguicolors'))
   set termguicolors
@@ -19,7 +20,8 @@ let g:material_theme_style = 'darker'
 let g:airline_theme = 'material'
 colorscheme material
 
-set encoding=utf-8
+" highlight WhiteSpaceBol ctermbg=0 guibg=0
+" match WhiteSpaceBol /^ \+/
 
 set number
 
@@ -31,12 +33,16 @@ set expandtab
 " disable autoindenting #comments in YAML
 autocmd BufNewFile,BufReadPost * if &filetype == "yaml" | set expandtab shiftwidth=2 indentkeys-=0# | endif
 
+autocmd BufNewFile,BufReadPost * if &filetype == "rust" | set expandtab shiftwidth=4 tabstop=4 | endif
+
 " Enable folding
 set foldmethod=indent
 set foldlevel=99
 
 " Listchars
-set list listchars=tab:»·,trail:·,nbsp:·,space:·
+set list listchars=tab:»·,trail:·,nbsp:·
+
+
 
 " ALE - https://github.com/dense-analysis/ale
 let g:ale_linters = {
