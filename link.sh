@@ -30,6 +30,7 @@ fi
 ln -sr ./.bashrc ~/.bashrc
 ln -sr ./.alias.sh ~/.alias.sh
 
+echo "Copy the files in bin/ to a directory in PATH - $PATH"
 
 #ohmyzsh
 #rm ~/.zshrc
