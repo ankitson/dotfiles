@@ -56,8 +56,11 @@ if [ -n "$force_color_prompt" ]; then
     fi
 fi
 
+GIT_PS1_SHOWDIRTYSTATE=1
+source $HOME/dotfiles/git-branch.sh
+
 if [ "$color_prompt" = yes ]; then
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+  PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]$(__git_ps1 " (%s)")\$ '
 else
     PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
 fi
@@ -120,6 +123,29 @@ shopt -s histappend # dont clear history file
 export PROMPT_COMMAND="history -a; history -n" # update the history file and read it before every command
 
 
+# >>> JVM installed by coursier >>>
+export JAVA_HOME="/home/ankit/.cache/coursier/jvm/adopt@1.8.0-275"
+export PATH="$PATH:/home/ankit/.cache/coursier/jvm/adopt@1.8.0-275/bin"
+# <<< JVM installed by coursier <<<
+
+# >>> coursier install directory >>>
+export PATH="$PATH:/home/ankit/.local/share/coursier/bin"
+# <<< coursier install directory <<<
+
+# rust
+. "$HOME/.cargo/env"
+
+#python
+export PATH="$HOME/.poetry/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+
+#go 
+export PATH="/usr/local/go/bin:$PATH"
+
+#custom bin
+export PATH="$HOME/bin:$PATH"
+
 source $HOME/.alias.sh
 source /usr/share/doc/fzf/examples/key-bindings.bash
 source /usr/share/doc/fzf/examples/completion.bash
+

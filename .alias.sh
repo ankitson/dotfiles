@@ -19,3 +19,15 @@ function cargo_test_stdout() {
   cargo test -- --nocapture
 }
 alias 'ct'='cargo_test_stdout'
+
+if [ ! -z "$(which exa)" ]
+then
+  alias x="exa"
+  if [ ! -z "$(exa --version | grep "\+git")" ]
+  then
+    alias xl="exa --long --header --git --icons"
+    alias xlt="exa -a --long --header --git --icons --tree --level=2"
+    alias xltt="exa -a --long --header --git --icons --tree --level=3"
+  fi
+fi
+

@@ -85,3 +85,11 @@ let mapleader=","
   " open fzf with Ctrl+P
   command! -bang UserFiles call fzf#vim#files('../', <bang>0)
   nnoremap <C-p> :UserFiles<Cr>
+
+  " retab 4 space to 2
+  nnoremap <silent> <leader>rt2 :set noexpandtab tabstop=4 | retab! | set expandtab tabstop=2 | retab
+
+  " retab 2 space to 4
+  nnoremap <silent> <leader>rt4 :set noexpandtab tabstop=2 | retab! | set expandtab tabstop=4 | retab
+    
+
