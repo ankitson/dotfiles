@@ -95,3 +95,11 @@ export CLICOLOR=1
 
 export PATH=$PATH:/home/ankit/go/bin
 . "$HOME/.cargo/env"
+
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init --path)"
+# Created by `pipx` on 2022-03-12 01:11:13
+export PATH="$PATH:/home/ankit/.local/bin"
+
+export LS_COLORS+=':ow=01;33'

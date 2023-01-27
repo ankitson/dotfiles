@@ -4,8 +4,21 @@ alias fd="fdfind"
 alias soh="sort --human-numeric-sort"
 alias vim="nvim"
 alias ls="ls --color=auto"
-alias ll="ls -halt"
+alias ll="ls -hlt"
+alias lla="ls -halt"
 alias g="git"
+
+if [ ! -z "$(which exa)" ]
+then
+  alias x="exa"
+  if [ ! -z "$(exa --version | grep "\+git")" ]
+  then
+    alias xl="exa --long --header --git --icons"
+    alias xlt="exa -a --long --header --git --icons --tree --level=2"
+    alias xltt="exa -a --long --header --git --icons --tree --level=3"
+  fi
+fi
+
 #If the last character of the alias value is a blank, then the next command word following the alias is also checked for alias expansion.
 #https://www.gnu.org/software/bash/manual/bash.html#Aliases 
 #This allows sudo to work with aliases.
