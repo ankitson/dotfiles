@@ -14,8 +14,13 @@
   co = checkout
   d = diff
   dc = diff --cached
-  lo = log --pretty='%C(yellow)%h %C(cyan)%cd %Cblue%aN%C(auto)%d %Creset%s' --graph --date-order --date=human #'format:"%Y-%m-%d %H:%M"'
+  lo = log --pretty='%C(yellow)%h %C(cyan)%cd %Cblue%aN%C(auto)%d %Creset%s' --graph --date-order --date='format:"%Y-%m-%d %H:%M"'
   s = status
   ps = push
   pl = pull
   us = reset HEAD --
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
