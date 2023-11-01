@@ -136,4 +136,9 @@ eval "$(pyenv init --path)"
 # Created by `pipx` on 2022-03-12 01:11:13
 export PATH="$PATH:/home/ankit/.local/bin"
 
+# Cuda
+export PATH="$PATH://usr/local/cuda-12.2/bin${PATH:+:${PATH}}"
+export LD_LIBRARY_PATH=/usr/local/cuda-12.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+
+export BORG_REPO="/media/ankit/store-ext4/borg/"
 export LS_COLORS+=':ow=01;33'
