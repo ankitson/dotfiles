@@ -1,10 +1,10 @@
 [user]
-	email = ankitsoni9@gmail.com
-	name = Ankit Soni
+  email = dev@ankitson.com
+  name = Ankit Soni
 [init]
   defaultBranch = main
 [core]
-	editor = nvim
+  editor = nvim
   excludesfile = ~/.gitignore_global
 [alias]
   a = add

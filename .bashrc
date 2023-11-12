@@ -51,9 +51,9 @@ GIT_PS1_SHOWDIRTYSTATE=1
 source $HOME/dotfiles/git-branch.sh
 
 if [ "$color_prompt" = yes ]; then
-  PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]$(__git_ps1 " (%s)")\$ '
+  PS1='\033[33m[\D{%y/%m/%d %H:%M}]\033[0m${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]$(__git_ps1 " (%s)")\$ '
 else
-    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+  PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
 fi
 unset color_prompt force_color_prompt
 
@@ -87,9 +87,8 @@ fi
 export EDITOR=vim
 
 # sync bash history between instances - https://web.archive.org/web/20170104092506/http://briancarper.net/blog/248.html
-shopt -s histappend # dont clear history file
-export PROMPT_COMMAND="history -a; history -n" # update the history file and read it before every command
-
+#shopt -s histappend # dont clear history file
+#export PROMPT_COMMAND="history -a; history -n" # update the history file and read it before every command
 
 # >>> JVM installed by coursier >>>
 export JAVA_HOME="/home/ankit/.cache/coursier/jvm/adopt@1.8.0-275"
@@ -109,6 +108,11 @@ export PATH="$HOME/.local/bin:$PATH"
 
 #go 
 export PATH="/usr/local/go/bin:$PATH"
+
+#c++
+#use clang by default
+export CC=clang
+export CXX=clang++
 
 #custom bin
 export PATH="$HOME/bin:$PATH"
@@ -130,6 +134,9 @@ export CLICOLOR=1
 export PATH=$PATH:/home/ankit/go/bin
 . "$HOME/.cargo/env"
 
+
+# Python
+# pyenv
 export PYENV_ROOT="$HOME/.pyenv"
 export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init --path)"
