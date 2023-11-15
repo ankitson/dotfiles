@@ -7,6 +7,7 @@ alias ls="ls --color=auto"
 alias ll="ls -hlt"
 alias lla="ls -halt"
 alias g="git"
+alias j="just"
 
 #EXA is unmaintained, now using https://github.com/eza-community/eza which fixes an important bug in grid view
 if [ ! -z "$(which eza)" ]
@@ -15,9 +16,14 @@ then
   if [ ! -z "$(eza --version | grep "\+git")" ]
   then
     alias xl="eza --grid --header --git --icons --classify"
-    alias xll="eza --long --header --git --icons --classify"
-    alias xlt="eza -a --long --header --git --icons --tree --level=2"
-    alias xltt="eza -a --long --header --git --icons --tree --level=3"
+    alias xll="eza --long --header --git --icons --classify --sort newest"
+    alias xlln="eza --long --header --git --icons --classify"
+    alias xlt="eza -a --long --header --git --icons --tree --level=2 --sort newest"
+    alias xltn="eza -a --long --header --git --icons --tree --level=2"
+    alias xltt="eza -a --long --header --git --icons --tree --level=3 --sort newest"
+    alias xlttn="eza -a --long --header --git --icons --tree --level=3"
+    alias xltree="eza -a --long --header --git --icons --tree --sort newest"
+    alias xltreen="eza -a --long --header --git --icons --tree"
   fi
 fi
 
