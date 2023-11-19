@@ -1,4 +1,4 @@
-# ~/.bashrc: executed by bash(1) for non-login shells.
+
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
 
@@ -51,7 +51,7 @@ GIT_PS1_SHOWDIRTYSTATE=1
 source $HOME/dotfiles/git-branch.sh
 
 if [ "$color_prompt" = yes ]; then
-  PS1='\033[33m[\D{%y/%m/%d %H:%M}]\033[0m${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]$(__git_ps1 " (%s)")\$ '
+  PS1='\[\033[33m\][\D{%y/%m/%d %H:%M}]\[\033[0m\]${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]$(__git_ps1 " (%s)")\$ '
 else
   PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
 fi
@@ -89,11 +89,6 @@ export EDITOR=vim
 # sync bash history between instances - https://web.archive.org/web/20170104092506/http://briancarper.net/blog/248.html
 #shopt -s histappend # dont clear history file
 #export PROMPT_COMMAND="history -a; history -n" # update the history file and read it before every command
-
-# >>> JVM installed by coursier >>>
-export JAVA_HOME="/home/ankit/.cache/coursier/jvm/adopt@1.8.0-275"
-export PATH="$PATH:/home/ankit/.cache/coursier/jvm/adopt@1.8.0-275/bin"
-# <<< JVM installed by coursier <<<
 
 # >>> coursier install directory >>>
 export PATH="$PATH:/home/ankit/.local/share/coursier/bin"
@@ -146,6 +141,9 @@ export PATH="$PATH:/home/ankit/.local/bin"
 # Cuda
 export PATH="$PATH://usr/local/cuda-12.2/bin${PATH:+:${PATH}}"
 export LD_LIBRARY_PATH=/usr/local/cuda-12.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+
+# Java
+export JAVA_HOME=/usr/lib/jvm/java-1.19.0-openjdk-amd64
 
 export BORG_REPO="/media/ankit/store-ext4/borg/"
 export LS_COLORS+=':ow=01;33'
