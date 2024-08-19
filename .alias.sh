@@ -8,6 +8,8 @@ alias ll="ls -hlt"
 alias lla="ls -halt"
 alias g="git"
 alias j="just"
+#NOTE THE space after the end allows other aliases to be used after this one
+alias nobuf="stdbuf -o0 " #dont buffer stdout
 
 #EXA is unmaintained, now using https://github.com/eza-community/eza which fixes an important bug in grid view
 if [ ! -z "$(which eza)" ]
@@ -17,13 +19,13 @@ then
   then
     alias xl="eza --grid --header --git --icons --classify"
     alias xll="eza --long --header --git --icons --classify --sort newest"
-    alias xlln="eza --long --header --git --icons --classify"
+    alias xllu="eza --long --header --git --icons --classify"
     alias xlt="eza -a --long --header --git --icons --tree --level=2 --sort newest"
-    alias xltn="eza -a --long --header --git --icons --tree --level=2"
+    alias xltu="eza -a --long --header --git --icons --tree --level=2"
     alias xltt="eza -a --long --header --git --icons --tree --level=3 --sort newest"
-    alias xlttn="eza -a --long --header --git --icons --tree --level=3"
-    alias xltree="eza -a --long --header --git --icons --tree --sort newest"
-    alias xltreen="eza -a --long --header --git --icons --tree"
+    alias xlttu="eza -a --long --header --git --icons --tree --level=3"
+    alias xlttree="eza -a --long --header --git --icons --tree --sort newest"
+    alias xltreeu="eza -a --long --header --git --icons --tree"
   fi
 fi
 
@@ -32,7 +34,7 @@ fi
 #This allows sudo to work with aliases.
 alias sudo="sudo "
 
-alias dc="sudo docker-compose -f /home/ankit/homeserver/docker-compose.yaml"
+alias dc="sudo docker compose -f /home/ankit/homeserver/docker-compose.yaml"
 function dc_log_short() {
   sudo docker compose -f /home/ankit/homeserver/docker-compose.yaml logs -f -t --tail=10 $1
 }

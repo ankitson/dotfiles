@@ -147,3 +147,23 @@ export JAVA_HOME=/usr/lib/jvm/java-1.19.0-openjdk-amd64
 
 export BORG_REPO="/media/ankit/store-ext4/borg/"
 export LS_COLORS+=':ow=01;33'
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/home/ankit/miniforge3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/home/ankit/miniforge3/etc/profile.d/conda.sh" ]; then
+        . "/home/ankit/miniforge3/etc/profile.d/conda.sh"
+    else
+        export PATH="/home/ankit/miniforge3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+
+if [ -f "/home/ankit/miniforge3/etc/profile.d/mamba.sh" ]; then
+    . "/home/ankit/miniforge3/etc/profile.d/mamba.sh"
+fi
+# <<< conda initialize <<<
+

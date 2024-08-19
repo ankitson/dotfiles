@@ -9,7 +9,7 @@
 [alias]
   a = add
   ap = add -p
-  bl = branch -a --sort=-committerdate --format='%(HEAD)%(color:yellow)%(refname:short) %(color:bold green)%(committerdate:relative) %(color:magenta)%(authorname)%(color:reset) %(color:blue)%(subject)'
+  bl = branch -a --sort=-committerdate --format='%(HEAD)%(color:yellow)%(refname:short)\t%(color:bold green)%(committerdate:relative)\t%(color:magenta)%(authorname)%(color:reset)\t%(color:blue)%(subject)'
   cm = commit
   co = checkout
   d = diff
