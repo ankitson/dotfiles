@@ -1,0 +1,52 @@
+[user]
+  email = {{ .email }}
+  name = Ankit Soni
+[init]
+  defaultBranch = main
+[core]
+  editor = nvim
+  excludesfile = ~/.gitignore_global
+[alias]
+  a = add
+  ap = add -p
+  bl = branch -a --sort=-committerdate --format='%(HEAD)%(color:yellow)%(refname:short) %(color:bold green)%(committerdate:relative) %(color:magenta)%(authorname)%(color:reset) %(color:blue)%(subject)'
+  cm = commit
+  co = checkout
+  d = diff
+  dc = diff --cached
+  lo = log --pretty='%C(yellow)%h %C(cyan)%cd %Cblue%aN%C(auto)%d %Creset%s%b' --graph --date-order --date='format:"%Y-%m-%d %H:%M"'
+  s = status
+  ps = push
+  pl = pull
+  us = reset HEAD --
+[diff]
+  algorithm = histogram
+  colorMoved = plain
+  renames = true
+[fetch]
+  prune = true
+[merge]
+  conflictStyle = zdiff3
+[pull]
+  rebase = true
+[push]
+  autoSetupRemote = true
+  default = current
+[rebase]
+  autoSquash = true
+  autoStash = true
+  updateRefs = true
+[filter "lfs"]
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
+{{ if .personal -}}
+[url "git@github.com:ankitson/"]
+  insteadOf = https://github.com/ankitson/
+{{ end -}}
+{{- $ghPath := lookPath "gh" }}
+{{- if $ghPath }}
+[credential "https://github.com"]
+  helper = !{{ $ghPath }} auth git-credential
+{{- end }}

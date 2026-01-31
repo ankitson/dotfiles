@@ -1,0 +1,53 @@
+{{/* boolean feature tags */}}
+{{- $personal := false -}}{{/* true if this machine should have secrets from 1Password */}}
+{{- $is_devbox := false -}}
+{{- $is_homeserver := false -}}
+{{- $internal_network := false -}}{{/* true if on home LAN with access to git.home.ankitson.com */}}
+{{- "" -}}
+
+{{- $osID := .chezmoi.os -}}
+{{- if (and (eq .chezmoi.os "linux") (hasKey .chezmoi.osRelease "id")) -}}
+{{-   $osID = printf "%s-%s" .chezmoi.os .chezmoi.osRelease.id -}}
+{{- end -}}
+
+{{- $hostname := .chezmoi.hostname -}}
+
+{{- if eq $hostname "desktop-linux" -}}
+{{-   $personal = true -}}
+{{-   $is_homeserver = true -}}
+{{-   $internal_network = true -}}
+{{- else if eq $hostname "devbox" -}}
+{{-   $personal = true -}}
+{{-   $is_devbox = true -}}
+{{-   $internal_network = true -}}
+{{- else if stdinIsATTY -}}
+{{-   $personal = promptBoolOnce . "personal" "personal (1Password secrets)" -}}
+{{- end -}}
+
+{{- $email := "dev@ankitson.com" -}}
+
+{{/* Auto-detect Java */}}
+{{- $javaHome := "" -}}
+{{- if lookPath "java" -}}
+{{-   $javaHome = output "bash" "-c" "readlink -f $(which java) | sed 's|/bin/java$||'" | trim -}}
+{{- end -}}
+
+{{/* Auto-detect CUDA */}}
+{{- $cudaPath := "" -}}
+{{- if stat "/usr/local/cuda" -}}
+{{-   $cudaPath = "/usr/local/cuda" -}}
+{{- end -}}
+
+[data]
+    email = {{ $email | quote }}
+    hostname = {{ $hostname | quote }}
+    personal = {{ $personal }}
+    is_devbox = {{ $is_devbox }}
+    is_homeserver = {{ $is_homeserver }}
+    internal_network = {{ $internal_network }}
+    osid = {{ $osID | quote }}
+    javaHome = {{ $javaHome | quote }}
+    cudaPath = {{ $cudaPath | quote }}
+
+[github]
+    refreshPeriod = "12h"

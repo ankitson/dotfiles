@@ -1,0 +1,103 @@
+alias g="git"
+alias ls="ls --color=auto"
+alias ll="ls -hlt"
+alias lla="ls -halt"
+alias soh="sort --human-numeric-sort"
+
+# Allow aliases after sudo
+alias sudo="sudo "
+
+{{- if lookPath "nvim" }}
+alias vim="nvim"
+{{- end }}
+
+{{- if lookPath "bat" }}
+alias b="bat "
+{{- end }}
+
+{{- if lookPath "fdfind" }}
+alias fd="fdfind"
+{{- end }}
+
+{{- if lookPath "eza" }}
+alias x="eza --classify"
+alias xl="eza --grid --header --git --icons --classify"
+alias xll="eza --long --header --git --icons --classify --sort newest"
+alias xls="eza --long --header --git --icons --classify --sort size --total-size"
+alias xlln="eza --long --header --git --icons --classify"
+alias xlt="eza -a --long --header --git --icons --tree --level=2 --sort newest"
+alias xltn="eza -a --long --header --git --icons --tree --level=2"
+alias xltt="eza -a --long --header --git --icons --tree --level=3 --sort newest"
+alias xlttn="eza -a --long --header --git --icons --tree --level=3"
+alias xltree="eza -a --long --header --git --icons --tree --sort newest"
+alias xltreen="eza -a --long --header --git --icons --tree"
+{{- end }}
+
+{{- if lookPath "terraform" }}
+alias tf="terraform"
+alias tfaa="terraform apply -auto-approve"
+{{- end }}
+
+{{- if lookPath "stdbuf" }}
+alias nobuf="stdbuf -o0 "
+{{- end }}
+
+alias psudo='sudo env "PATH=$PATH" '
+
+{{ if .personal -}}
+# 1Password helper (needed by claudep)
+[ -f "$HOME/.op_helper.sh" ] && source "$HOME/.op_helper.sh"
+
+# Claude CLI via 1Password
+claudep() {
+  op_exec_interactive \
+    CLAUDE_CODE_OAUTH_TOKEN=op://Private/Anthropic/claude-code-setup-token \
+    -- claude "$@"
+}
+{{ end -}}
+
+{{ if .is_homeserver -}}
+# Docker compose (homeserver)
+alias dc="sudo docker compose -f /home/ankit/homeserver/docker-compose.yaml"
+dc_log_short() {
+  sudo docker compose -f /home/ankit/homeserver/docker-compose.yaml logs -f -t --tail=10 "$1"
+}
+alias dcl='dc_log_short'
+
+# Suspend and exit SSH session
+alias bye="sudo systemd-run --on-active=1s systemctl suspend && exit"
+{{ end -}}
+
+# Shell functions (always available)
+cd_up() {
+  cd $(printf "%0.0s../" $(seq 1 $1));
+}
+alias 'cd..'='cd_up'
+
+{{- if lookPath "cargo" }}
+cargo_test_stdout() {
+  cargo test -- --nocapture
+}
+alias ct='cargo_test_stdout'
+{{- end }}
+
+rsync_cp() {
+  rsync -vhrazP "$1" "$2"
+}
+alias rscp='rsync_cp'
+
+{{- if lookPath "just" }}
+just_choose() {
+  if [ "$#" -eq 0 ]; then
+    just --choose
+  else
+    just "$@"
+  fi
+}
+alias j='just_choose'
+{{- end }}
+
+repo_to_text() {
+  git ls-files | grep -Ev '^tests/' | xargs -r tail -n +1
+}
+alias r2t="repo_to_text"

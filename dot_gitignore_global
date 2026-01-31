@@ -1,0 +1,35 @@
+# OS
+.DS_Store
+
+# Editors
+.vscode-server/
+.idea/
+
+# Javascript
+.npm/
+node_modules/
+
+# Scala
+.bloop/
+.metals/
+.sbt/
+.cache/
+.ammonite/*
+ensime_cache/
+
+# JVM
+target/
+*.class
+.ivy2/
+
+# Python
+*.pyc
+venv/
+virtualenv/
+.poetry/
+site-packages/
+
+# Rust
+.rustup/
+.cargo/*
+!.cargo/config
