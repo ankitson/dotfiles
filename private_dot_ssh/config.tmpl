@@ -3,6 +3,11 @@ HashKnownHosts no
 Host github.com
   User git
 
+{{ if .internal_network -}}
+Host git.home.ankitson.com
+  Port 1024
+{{ end -}}
+
 Host desktop desktop-linux
   HostName 172.16.0.208
   User ankit

@@ -74,41 +74,35 @@ export JAVA_HOME={{ .javaHome | quote }}
 # =============================
 # PATH (single consolidated block)
 # =============================
-{{- $homeDir := .chezmoi.homeDir }}
-{{- $paths := list }}
-
-{{/* Home-relative paths (shared) */}}
-{{- range (list "bin" "bin/vendor" "go/bin" ".cargo/bin" ".local/bin" ".local/share/coursier/bin") }}
-{{-   $p := joinPath $homeDir . }}
-{{-   if stat $p }}
-{{-     $paths = mustAppend $paths $p }}
-{{-   end }}
+{{- $homeDir := .chezmoi.homeDir -}}
+{{- $paths := list -}}
+{{- /* Home-relative paths (shared) */ -}}
+{{- range (list "bin" "bin/vendor" "go/bin" ".cargo/bin" ".local/bin" ".local/share/coursier/bin") -}}
+{{-   $p := joinPath $homeDir . -}}
+{{-   if stat $p -}}
+{{-     $paths = mustAppend $paths $p -}}
+{{-   end -}}
+{{- end -}}
+{{- /* System paths */ -}}
+{{- range (list "/usr/local/go/bin") -}}
+{{-   if stat . -}}
+{{-     $paths = mustAppend $paths . -}}
+{{-   end -}}
+{{- end -}}
+{{- /* CUDA */ -}}
+{{- if .cudaPath -}}
+{{-   $paths = mustAppend $paths (printf "%s/bin" .cudaPath) -}}
+{{- end -}}
+{{- /* Java */ -}}
+{{- if .javaHome -}}
+{{-   $paths = mustAppend $paths (printf "%s/bin" .javaHome) -}}
+{{- end -}}
+{{- /* Homeserver-specific */ -}}
+{{- if .is_homeserver -}}
+{{-   if stat "/home/ankit/homeserver/bin" -}}
+{{-     $paths = mustAppend $paths "/home/ankit/homeserver/bin" -}}
+{{-   end -}}
 {{- end }}
-
-{{/* System paths */}}
-{{- range (list "/usr/local/go/bin") }}
-{{-   if stat . }}
-{{-     $paths = mustAppend $paths . }}
-{{-   end }}
-{{- end }}
-
-{{/* CUDA */}}
-{{- if .cudaPath }}
-{{-   $paths = mustAppend $paths (printf "%s/bin" .cudaPath) }}
-{{- end }}
-
-{{/* Java */}}
-{{- if .javaHome }}
-{{-   $paths = mustAppend $paths (printf "%s/bin" .javaHome) }}
-{{- end }}
-
-{{/* Homeserver-specific */}}
-{{- if .is_homeserver }}
-{{-   if stat "/home/ankit/homeserver/bin" }}
-{{-     $paths = mustAppend $paths "/home/ankit/homeserver/bin" }}
-{{-   end }}
-{{- end }}
-
 {{ if $paths -}}
 export PATH={{ toStrings $paths | join ":" }}:$PATH
 {{ end -}}
