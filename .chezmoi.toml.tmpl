@@ -2,6 +2,7 @@
 {{- $personal := false -}}{{/* true if this machine should have secrets from 1Password */}}
 {{- $is_devbox := false -}}
 {{- $is_homeserver := false -}}
+{{- $is_agent := false -}}{{/* true if running as an automated agent (service account) */}}
 {{- $internal_network := false -}}{{/* true if on home LAN with access to git.home.ankitson.com */}}
 {{- "" -}}
 
@@ -12,7 +13,11 @@
 
 {{- $hostname := .chezmoi.hostname -}}
 
-{{- if eq $hostname "desktop-linux" -}}
+{{- if env "OP_SERVICE_ACCOUNT_TOKEN" -}}
+{{-   $is_agent = true -}}
+{{-   $personal = true -}}{{/* agents still need secrets deployed */}}
+{{-   $is_devbox = true -}}
+{{- else if eq $hostname "desktop-linux" -}}
 {{-   $personal = true -}}
 {{-   $is_homeserver = true -}}
 {{-   $internal_network = true -}}
@@ -44,6 +49,7 @@
     personal = {{ $personal }}
     is_devbox = {{ $is_devbox }}
     is_homeserver = {{ $is_homeserver }}
+    is_agent = {{ $is_agent }}
     internal_network = {{ $internal_network }}
     osid = {{ $osID | quote }}
     javaHome = {{ $javaHome | quote }}
@@ -51,3 +57,8 @@
 
 [github]
     refreshPeriod = "12h"
+
+{{ if $is_agent -}}
+[onepassword]
+    mode = "service"
+{{ end -}}

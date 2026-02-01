@@ -45,15 +45,25 @@ alias nobuf="stdbuf -o0 "
 alias psudo='sudo env "PATH=$PATH" '
 
 {{ if .personal -}}
-# 1Password helper (needed by claudep)
+{{ if not .is_agent -}}
+# 1Password helper (needed by claudep in interactive mode)
 [ -f "$HOME/.op_helper.sh" ] && source "$HOME/.op_helper.sh"
+{{ end -}}
 
-# Claude CLI via 1Password
+{{ if .is_agent -}}
+# Agent mode: service account token is already in env, op read works directly
+claudep() {
+  CLAUDE_CODE_OAUTH_TOKEN="$(op read "op://Agents/claude-code/credential")" \
+    claude "$@"
+}
+{{ else -}}
+# Interactive mode: use op_exec_interactive for safe secret injection + cleanup
 claudep() {
   op_exec_interactive \
     CLAUDE_CODE_OAUTH_TOKEN=op://Private/Anthropic/claude-code-setup-token \
     -- claude "$@"
 }
+{{ end -}}
 {{ end -}}
 
 {{ if .is_homeserver -}}

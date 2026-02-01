@@ -1,6 +1,11 @@
 [user]
+{{ if .is_agent -}}
+  email = agent@ankitson.com
+  name = Devbox Agent
+{{ else -}}
   email = {{ .email }}
   name = Ankit Soni
+{{ end -}}
 [init]
   defaultBranch = main
 [core]
@@ -41,7 +46,7 @@
   smudge = git-lfs smudge -- %f
   process = git-lfs filter-process
   required = true
-{{ if .personal -}}
+{{ if or .personal .is_agent -}}
 [url "git@github.com:ankitson/"]
   insteadOf = https://github.com/ankitson/
 {{ end -}}
