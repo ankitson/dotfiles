@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-01-31: WezTerm template + macOS portability
+
+### Added
+- `dot_wezterm.lua.tmpl`: WezTerm config converted to chezmoi template. Shell path uses `stat` to detect Homebrew bash, falls back to `/bin/bash`. `macos_window_background_blur` only on macOS. `audible_bell = 'Disabled'`.
+- `private_dot_config/karabiner/karabiner.json`: Karabiner config moved into chezmoi directory structure, deployed to `~/.config/karabiner/` on macOS only.
+- `dot_bashrc.tmpl`: Added `eval "$(/opt/homebrew/bin/brew shellenv)"` on macOS, before environment/PATH blocks.
+
+### Changed
+- `.chezmoiignore.tmpl`: Added karabiner ignore rule for non-macOS machines.
+
+### Removed
+- `.wezterm.lua`: Replaced by `dot_wezterm.lua.tmpl`
+- `karabiner.json`: Moved to `private_dot_config/karabiner/karabiner.json`
+- `.zshrc`: Old oh-my-zsh config, superseded by `.bashrc.tmpl`
+
 ## 2026-01-30: v2 Reorganization
 
 ### Added

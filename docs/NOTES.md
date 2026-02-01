@@ -32,6 +32,23 @@
 | `Borg Backup` | `password` | `$BORG_PASSCOMMAND` (runtime) |
 | `Anthropic` | `claude-code-setup-token` | `claudep` function (runtime) |
 
+## 2026-01-31: WezTerm + macOS portability
+
+### What was done
+- Converted `.wezterm.lua` to chezmoi template (`dot_wezterm.lua.tmpl`)
+- Templated `default_prog` to use Homebrew bash if `/opt/homebrew/bin/bash` exists, otherwise `/bin/bash`
+- `macos_window_background_blur` only emitted on macOS
+- Added `audible_bell = 'Disabled'`
+- Added `eval "$(/opt/homebrew/bin/brew shellenv)"` to `.bashrc.tmpl` on macOS (before PATH/environment block)
+- Moved `karabiner.json` to `private_dot_config/karabiner/karabiner.json`, ignored on non-macOS via `.chezmoiignore.tmpl`
+- Deleted old `.zshrc` (superseded by `.bashrc.tmpl`)
+
+### Key Design Decisions
+- **WezTerm shell detection**: Uses `stat "/opt/homebrew/bin/bash"` rather than OS check — works if someone has macOS without Homebrew bash
+- **Karabiner macOS-only**: Gated via `.chezmoiignore.tmpl` (`ne .chezmoi.os "darwin"`), not a template — the JSON stays plain
+- **Brew shellenv**: Placed early in `.bashrc.tmpl` (after bash-completion, before environment/PATH) so `HOMEBREW_PREFIX` is available for downstream tools
+- **SSHMUX persistence**: Confirmed that `wezterm-mux-server --ssh` survives client disconnects — sessions persist without needing `unix_domains` daemon setup
+
 ### Verification Steps
 1. `chezmoi execute-template < .chezmoi.toml.tmpl` — verify feature detection
 2. `chezmoi diff` — inspect what would change
