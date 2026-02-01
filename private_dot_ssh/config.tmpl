@@ -1,5 +1,10 @@
 HashKnownHosts no
 
+Host *
+  # will exit in 12s if server goes to sleep
+  ServerAliveInterval 3
+  ServerAliveCountMax 4
+
 Host github.com
   User git
 

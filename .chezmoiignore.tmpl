@@ -7,3 +7,8 @@ logs/
 .ssh
 .ssh/**
 {{ end }}
+
+{{ if ne .chezmoi.os "darwin" }}
+.config/karabiner
+.config/karabiner/**
+{{ end }}

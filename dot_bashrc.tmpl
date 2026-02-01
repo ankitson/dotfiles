@@ -50,6 +50,11 @@ if ! shopt -oq posix; then
   fi
 fi
 
+{{ if eq .chezmoi.os "darwin" -}}
+# Homebrew
+eval "$(/opt/homebrew/bin/brew shellenv)"
+{{ end -}}
+
 # ===========
 # Environment
 # ===========
