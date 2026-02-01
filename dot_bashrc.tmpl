@@ -82,7 +82,7 @@ export JAVA_HOME={{ .javaHome | quote }}
 {{- $homeDir := .chezmoi.homeDir -}}
 {{- $paths := list -}}
 {{- /* Home-relative paths (shared) */ -}}
-{{- range (list "bin" "bin/vendor" "go/bin" ".cargo/bin" ".local/bin" ".local/share/coursier/bin") -}}
+{{- range (list ".local/bin/vendor" "go/bin" ".cargo/bin" ".local/bin" ".local/share/coursier/bin") -}}
 {{-   $p := joinPath $homeDir . -}}
 {{-   if stat $p -}}
 {{-     $paths = mustAppend $paths $p -}}
