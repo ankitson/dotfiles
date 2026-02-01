@@ -6,7 +6,9 @@ local config = {}
 -- =========================
 -- Shell
 -- =========================
-{{ if stat "/opt/homebrew/bin/bash" -}}
+{{ if eq .chezmoi.os "windows" -}}
+config.default_prog = { "powershell.exe" }
+{{ else if stat "/opt/homebrew/bin/bash" -}}
 config.default_prog = { "/opt/homebrew/bin/bash", "-l" }
 {{ else -}}
 config.default_prog = { "/bin/bash", "-l" }
