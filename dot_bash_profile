@@ -1,4 +1,0 @@
-# source .bashrc for login shells (e.g. SSH)
-if [ -f "$HOME/.bashrc" ]; then
-  . "$HOME/.bashrc"
-fi
