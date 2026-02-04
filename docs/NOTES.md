@@ -56,3 +56,11 @@
 4. `chezmoi cat ~/.ssh/id_rsa` — verify 1Password integration (requires `op signin`)
 5. `chezmoi cat ~/.gitconfig` — verify email, gh helper rendered
 6. `chezmoi apply -v -n` (dry run) on each host
+
+## 2026-02-04: Faster external refresh
+
+### What was done
+- Reduced `.chezmoiexternal.toml.tmpl` refresh periods to 24h for tpm, vim-plug, and clankerpedia
+
+### Rationale
+- Keeps externals fresher without requiring `chezmoi apply --refresh-externals` every time

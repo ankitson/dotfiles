@@ -41,3 +41,8 @@
 - `.chezmoiignore`: Replaced by `.chezmoiignore.tmpl`
 - `.chezmoiexternal.toml`: Replaced by `.chezmoiexternal.toml.tmpl`
 - `private_dot_config/nvim/autoload/plug.vim`: Now fetched via `.chezmoiexternal.toml.tmpl`
+
+## 2026-02-04: Faster external refresh
+
+### Changed
+- `.chezmoiexternal.toml.tmpl`: Reduced refresh periods for tpm, vim-plug, and clankerpedia to 24h
