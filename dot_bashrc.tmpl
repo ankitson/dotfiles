@@ -109,8 +109,11 @@ export JAVA_HOME={{ .javaHome | quote }}
 {{- end -}}
 {{- /* Homeserver-specific */ -}}
 {{- if .is_homeserver -}}
-{{-   if stat "/home/ankit/homeserver/bin" -}}
+{{-   if stat "/home/ankit/hroot/homeserver/bin" -}}
 {{-     $paths = mustAppend $paths "/home/ankit/homeserver/bin" -}}
+{{-   end -}}
+{{-   if stat "/home/ankit/hroot/homeserver/bin/vendor" -}}
+{{-     $paths = mustAppend $paths "/home/ankit/homeserver/bin/vendor" -}}
 {{-   end -}}
 {{- end }}
 {{ if $paths -}}
