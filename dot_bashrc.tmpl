@@ -9,6 +9,11 @@ shopt -s histappend
 HISTSIZE=100000
 HISTFILESIZE=200000
 
+# Readline completion behavior
+bind 'set show-all-if-ambiguous on'
+bind 'set menu-complete-display-prefix on'
+bind 'TAB:menu-complete'
+
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
 shopt -s checkwinsize
@@ -125,6 +130,8 @@ export LD_LIBRARY_PATH="{{ .cudaPath }}/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PAT
 
 # Completions
 {{ if lookPath "fzf" -}}
+export FZF_COMPLETION_TRIGGER='**'
+export FZF_COMPLETION_OPTS='--height 40% --layout=reverse --border'
 eval "$(fzf --bash)"
 {{ end -}}
 {{ if lookPath "terraform" -}}

@@ -64,3 +64,9 @@
 
 ### Rationale
 - Keeps externals fresher without requiring `chezmoi apply --refresh-externals` every time
+
+## 2026-02-04: Bash completion UX + fzf tweaks
+
+### What was done
+- Enabled readline to show all ambiguous completions and cycle through them with `TAB`
+- Added fzf completion defaults (`**` trigger, compact reverse layout) before `fzf --bash`

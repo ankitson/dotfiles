@@ -46,3 +46,8 @@
 
 ### Changed
 - `.chezmoiexternal.toml.tmpl`: Reduced refresh periods for tpm, vim-plug, and clankerpedia to 24h
+
+## 2026-02-04: Bash completion UX + fzf tweaks
+
+### Changed
+- `dot_bashrc.tmpl`: Enabled readline to show ambiguous matches on first `TAB`, added menu cycling, and set fzf completion trigger/options before `fzf --bash`
