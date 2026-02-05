@@ -52,6 +52,35 @@ op_shell() {
   rm -f "$envfile"
 }
 
+# -----------------------------------------------------------------------------
+# 1Password session sharing across WezTerm panes
+# -----------------------------------------------------------------------------
+# When you run `op_signin`, the session token is saved to ~/.op_session.
+# WezTerm watches this file and sets the env var for all new panes.
+# Existing panes pick it up via PROMPT_COMMAND on the next prompt.
+
+_OP_SESSION_FILE="$HOME/.op_session"
+_op_session_mtime=""
+
+op_signin() {
+  eval "$(command op signin "$@")"
+  # Save OP_SESSION_* vars for sharing across panes
+  ( umask 077; env | grep '^OP_SESSION_' | sed 's/^/export /' > "$_OP_SESSION_FILE" )
+}
+
+# Re-source session file when it changes (called via PROMPT_COMMAND)
+_op_check_session() {
+  [ -f "$_OP_SESSION_FILE" ] || return 0
+  local mtime
+  mtime=$(stat -c %Y "$_OP_SESSION_FILE" 2>/dev/null || stat -f %m "$_OP_SESSION_FILE" 2>/dev/null)
+  if [ "$mtime" != "$_op_session_mtime" ]; then
+    _op_session_mtime="$mtime"
+    source "$_OP_SESSION_FILE"
+  fi
+}
+
+PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}_op_check_session"
+
 op_exec_interactive() {
   local cleanup_vars=()
   local kv key ref value

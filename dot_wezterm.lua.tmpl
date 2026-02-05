@@ -129,4 +129,29 @@ wezterm.on('update-right-status', function(window, _pane)
   end
 end)
 
+-- =========================
+-- 1Password session sharing
+-- =========================
+-- Reads ~/.op_session (written by op_signin in the shell) and sets the
+-- OP_SESSION_* env var for every new pane/tab.  WezTerm watches the file
+-- and reloads config automatically when the session changes.
+do
+  local op_session_path = wezterm.home_dir .. '/.op_session'
+  wezterm.add_to_config_reload_watch_list(op_session_path)
+
+  local env = {}
+  local f = io.open(op_session_path, 'r')
+  if f then
+    for line in f:lines() do
+      local key, val = line:match('^export%s+([%w_]+)=(.*)')
+      if key and val then
+        env[key] = val
+      end
+    end
+    f:close()
+  end
+
+  config.set_environment_variables = env
+end
+
 return config

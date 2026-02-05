@@ -51,3 +51,9 @@
 
 ### Changed
 - `dot_bashrc.tmpl`: Enabled readline to show ambiguous matches on first `TAB`, added menu cycling, and set fzf completion trigger/options before `fzf --bash`
+
+## 2026-02-04: 1Password session sharing across WezTerm panes
+
+### Added
+- `dot_op_helper.sh`: `op_signin` wrapper that saves `OP_SESSION_*` to `~/.op_session`, plus `PROMPT_COMMAND` hook to auto-load it in existing panes
+- `dot_wezterm.lua.tmpl`: Reads `~/.op_session` and sets `config.set_environment_variables` for new panes; watches file for config reload

@@ -70,3 +70,14 @@
 ### What was done
 - Enabled readline to show all ambiguous completions and cycle through them with `TAB`
 - Added fzf completion defaults (`**` trigger, compact reverse layout) before `fzf --bash`
+
+## 2026-02-04: 1Password session sharing across WezTerm panes
+
+### What was done
+- Added `op_signin` wrapper and `PROMPT_COMMAND` hook to `dot_op_helper.sh`
+- Added `config.set_environment_variables` block to `dot_wezterm.lua.tmpl` that reads `~/.op_session`
+
+### How it works
+- `op_signin` runs `op signin` and writes `OP_SESSION_*` to `~/.op_session` (mode 600)
+- WezTerm watches `~/.op_session` via `add_to_config_reload_watch_list` — new panes get the var automatically
+- Existing panes pick it up on next prompt via `_op_check_session` in `PROMPT_COMMAND` (only re-reads on mtime change)
