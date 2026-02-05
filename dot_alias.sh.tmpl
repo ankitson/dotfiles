@@ -68,9 +68,9 @@ claudep() {
 
 {{ if .is_homeserver -}}
 # Docker compose (homeserver)
-alias dch="sudo docker compose -f /home/ankit/homeserver/docker-compose.yaml"
+alias dch="sudo docker compose -f /home/ankit/hroot/homeserver/docker-compose.yaml"
 dc_log_short() {
-  sudo docker compose -f /home/ankit/homeserver/docker-compose.yaml logs -f -t --tail=10 "$1"
+  sudo docker compose -f /home/ankit/hroot/homeserver/docker-compose.yaml logs -f -t --tail=10 "$1"
 }
 alias dcl='dc_log_short'
 
