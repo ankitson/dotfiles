@@ -27,6 +27,9 @@ case "$TERM" in
 esac
 
 GIT_PS1_SHOWDIRTYSTATE=1
+GIT_PS1_SHOWSTASHSTATE=1
+GIT_PS1_SHOWUNTRACKEDFILES=1
+GIT_PS1_SHOWUPSTREAM="auto"
 [ -f "$HOME/.git-branch.sh" ] && source "$HOME/.git-branch.sh"
 
 if [ "$color_prompt" = yes ]; then
