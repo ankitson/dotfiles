@@ -16,3 +16,9 @@ logs/
 {{ if ne .chezmoi.os "windows" }}
 wezterm-quake.ahk
 {{ end }}
+
+{{ if ne .chezmoi.os "linux" }}
+.local/bin/vendor/wezterm
+.local/bin/vendor/wezterm-mux-server
+.local/bin/vendor/strip-ansi-escapes
+{{ end }}
