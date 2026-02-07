@@ -111,3 +111,18 @@ repo_to_text() {
   git ls-files | grep -Ev '^tests/' | xargs -r tail -n +1
 }
 alias r2t="repo_to_text"
+
+{{- if lookPath "rg" }}
+rgs() {
+  rg \
+    --hidden \
+    --no-ignore \
+    --one-file-system \
+    --no-messages \
+    --max-count 3 \
+    --max-columns 200 \
+    --max-columns-preview \
+    "$@"
+}
+{{- end}}
+
