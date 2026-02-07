@@ -21,16 +21,16 @@ alias fd="fdfind"
 
 {{- if lookPath "eza" }}
 alias x="eza --classify"
-alias xl="eza --grid --header --git --icons --classify"
-alias xll="eza --long --header --git --icons --classify --sort newest"
-alias xls="eza --long --header --git --icons --classify --sort size --total-size"
-alias xlln="eza --long --header --git --icons --classify"
-alias xlt="eza -a --long --header --git --icons --tree --level=2 --sort newest"
-alias xltn="eza -a --long --header --git --icons --tree --level=2"
-alias xltt="eza -a --long --header --git --icons --tree --level=3 --sort newest"
-alias xlttn="eza -a --long --header --git --icons --tree --level=3"
-alias xltree="eza -a --long --header --git --icons --tree --sort newest"
-alias xltreen="eza -a --long --header --git --icons --tree"
+alias xl="eza --all --grid --header --git --icons --classify"
+alias xll="eza --all --long --header --git --icons --classify --sort newest"
+alias xls="eza --all --long --header --git --icons --classify --sort size --total-size"
+alias xlln="eza --all --long --header --git --icons --classify"
+alias xlt="eza --all --long --header --git --icons --tree --level=2 --sort newest --git-ignore --ignore-glob='.git|.svn|.hg|.DS_Store'"
+alias xltn="eza --all --long --header --git --icons --tree --level=2 --git-ignore --ignore-glob='.git|.svn|.hg|.DS_Store'"
+alias xltt="eza --all --long --header --git --icons --tree --level=3 --sort newest --git-ignore --ignore-glob='.git|.svn|.hg|.DS_Store'"
+alias xlttn="eza --all --long --header --git --icons --tree --level=3 --git-ignore --ignore-glob='.git|.svn|.hg|.DS_Store'"
+alias xltree="eza --all --long --header --git --icons --tree --sort newest --git-ignore --ignore-glob='.git|.svn|.hg|.DS_Store'"
+alias xltreen="eza --all --long --header --git --icons --tree --git-ignore --ignore-glob='.git|.svn|.hg|.DS_Store'"
 {{- end }}
 
 {{- if lookPath "terraform" }}
@@ -54,7 +54,7 @@ alias psudo='sudo env "PATH=$PATH" '
 # Agent mode: service account token is already in env, op read works directly
 claudep() {
   CLAUDE_CODE_OAUTH_TOKEN="$(op read "op://Agents/claude-code/credential")" \
-    claude "$@"
+    claude --allow-dangerously-skip-permissions "$@"
 }
 {{ else -}}
 # Interactive mode: use op_exec_interactive for safe secret injection + cleanup
