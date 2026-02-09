@@ -159,45 +159,45 @@ wezterm.on('update-right-status', function(window, _pane)
 end)
 
 -- Auto-name tabs based on running command
-wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_width)
-  local pane = tab.active_pane
-
-  -- If the tab title is explicitly set via set_title, use that
-  if tab.tab_title and #tab.tab_title > 0 then
-    return tab.tab_title
-  end
-
-  -- Try to get the process name from the foreground process (works for local panes)
-  if pane.foreground_process_name and #pane.foreground_process_name > 0 then
-    local basename = pane.foreground_process_name:match("([^/\\]+)$")
-    if basename and #basename > 0 then
-      return basename
-    end
-  end
-
-  -- Fall back to pane title (useful for remote SSH sessions)
-  if pane.title and #pane.title > 0 then
-    local title = pane.title
-
-    -- Try to extract path from "user@host: /path" format
-    local path = title:match("^[^:]+:%s*(.+)")
-    if path and #path > 0 then
-      -- Extract basename from path
-      local basename = path:match("([^/]+)/?$")
-      if basename and #basename > 0 then
-        return basename
-      end
-      -- If basename extraction failed, use the full path
-      return path
-    end
-
-    -- If pattern didn't match, use the full title as-is
-    return title
-  end
-
-  -- Last resort: use tab index
-  return tostring(tab.tab_index + 1)
-end)
+-- wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_width)
+--   local pane = tab.active_pane
+-- 
+--   -- If the tab title is explicitly set via set_title, use that
+--   if tab.tab_title and #tab.tab_title > 0 then
+--     return tab.tab_title
+--   end
+-- 
+--   -- Try to get the process name from the foreground process (works for local panes)
+--   if pane.foreground_process_name and #pane.foreground_process_name > 0 then
+--     local basename = pane.foreground_process_name:match("([^/\\]+)$")
+--     if basename and #basename > 0 then
+--       return basename
+--     end
+--   end
+-- 
+--   -- Fall back to pane title (useful for remote SSH sessions)
+--   if pane.title and #pane.title > 0 then
+--     local title = pane.title
+-- 
+--     -- Try to extract path from "user@host: /path" format
+--     local path = title:match("^[^:]+:%s*(.+)")
+--     if path and #path > 0 then
+--       -- Extract basename from path
+--       local basename = path:match("([^/]+)/?$")
+--       if basename and #basename > 0 then
+--         return basename
+--       end
+--       -- If basename extraction failed, use the full path
+--       return path
+--     end
+-- 
+--     -- If pattern didn't match, use the full title as-is
+--     return title
+--   end
+-- 
+--   -- Last resort: use tab index
+--   return tostring(tab.tab_index + 1)
+-- end)
 
 -- =========================
 -- 1Password session sharing
