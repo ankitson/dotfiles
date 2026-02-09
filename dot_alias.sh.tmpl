@@ -61,7 +61,7 @@ claudep() {
 claudep() {
   op_exec_interactive \
     CLAUDE_CODE_OAUTH_TOKEN=op://Private/Anthropic/claude-code-setup-token \
-    -- claude "$@"
+    -- claude --allow-dangerously-skip-permissions "$@"
 }
 {{ end -}}
 {{ end -}}
