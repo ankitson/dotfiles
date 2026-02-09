@@ -144,6 +144,11 @@ config.keys = {
   },
 }
 
+-- Play boing.mp3 on BEL
+wezterm.on('bell', function()
+  os.execute('mpv --no-video --really-quiet ' .. wezterm.home_dir .. '/boing.mp3 &')
+end)
+
 -- Status hint when passthrough is active
 wezterm.on('update-right-status', function(window, _pane)
   if window:active_key_table() == 'passthrough' then
