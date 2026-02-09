@@ -1,0 +1,35 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "litellm": {
+      "name": "LiteLLM",
+      "npm": "@ai-sdk/openai-compatible",
+      "options": {
+        "baseURL": "https://litellm.home.ankitson.com/v1",
+        "apiKey": "{env:LITELLM_API_KEY}"
+      },
+      "models": {
+        "claude-sonnet-4-5": {
+          "name": "Claude Sonnet 4.5"
+        },
+        "claude-opus-4-5": {
+          "name": "Claude Opus 4.5"
+        },
+        "gpt-4.1": {
+          "name": "GPT-4.1"
+        },
+        "o3": {
+          "name": "o3"
+        },
+        "gemini-2.5-pro": {
+          "name": "Gemini 2.5 Pro"
+        },
+        "deepseek-chat": {
+          "name": "DeepSeek Chat"
+        }
+      }
+    }
+  },
+  "model": "litellm/claude-sonnet-4-5",
+  "small_model": "litellm/deepseek-chat"
+}
