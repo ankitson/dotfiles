@@ -158,46 +158,71 @@ wezterm.on('update-right-status', function(window, _pane)
   end
 end)
 
--- Auto-name tabs based on running command
--- wezterm.on('format-tab-title', function(tab, tabs, panes, config, hover, max_width)
---   local pane = tab.active_pane
--- 
---   -- If the tab title is explicitly set via set_title, use that
---   if tab.tab_title and #tab.tab_title > 0 then
---     return tab.tab_title
---   end
--- 
---   -- Try to get the process name from the foreground process (works for local panes)
---   if pane.foreground_process_name and #pane.foreground_process_name > 0 then
---     local basename = pane.foreground_process_name:match("([^/\\]+)$")
---     if basename and #basename > 0 then
---       return basename
---     end
---   end
--- 
---   -- Fall back to pane title (useful for remote SSH sessions)
---   if pane.title and #pane.title > 0 then
---     local title = pane.title
--- 
---     -- Try to extract path from "user@host: /path" format
---     local path = title:match("^[^:]+:%s*(.+)")
---     if path and #path > 0 then
---       -- Extract basename from path
---       local basename = path:match("([^/]+)/?$")
---       if basename and #basename > 0 then
---         return basename
---       end
---       -- If basename extraction failed, use the full path
---       return path
---     end
--- 
---     -- If pattern didn't match, use the full title as-is
---     return title
---   end
--- 
---   -- Last resort: use tab index
---   return tostring(tab.tab_index + 1)
--- end)
+-- Stable tab title formatting:
+-- - keep path-only fallback titles (drop user/host prefix)
+-- - truncate total tab title length
+-- - cache fallback title per tab id to avoid oscillation with dynamic pane titles
+local MAX_TAB_TITLE_LEN = 28
+local tab_title_cache = {}
+
+local function truncate_text(text, max_len)
+  if not text or #text <= max_len then
+    return text
+  end
+  if max_len <= 3 then
+    return text:sub(1, max_len)
+  end
+  return text:sub(1, max_len - 3) .. '...'
+end
+
+local function extract_path_title(text)
+  if not text or #text == 0 then
+    return text
+  end
+
+  -- Prefer the path from titles like "user@host: /path" or "host: /path".
+  local path = text:match('^[^:]+:%s*(.+)$')
+  if path and #path > 0 then
+    return path
+  end
+
+  return text
+end
+
+wezterm.on('format-tab-title', function(tab, _tabs, _panes, _cfg, _hover, _max_width)
+  local ok, computed = pcall(function()
+    local limit = MAX_TAB_TITLE_LEN
+
+    if tab.tab_title and #tab.tab_title > 0 then
+      return truncate_text(extract_path_title(tab.tab_title), limit)
+    end
+
+    local tab_id = tab.tab_id
+    if tab_id ~= nil then
+      local cached = tab_title_cache[tab_id]
+      if cached and #cached > 0 then
+        return truncate_text(cached, limit)
+      end
+    end
+
+    local pane = tab.active_pane
+    local fallback = pane and pane.title or ''
+    fallback = extract_path_title(fallback)
+    if fallback and #fallback > 0 then
+      if tab_id ~= nil then
+        tab_title_cache[tab_id] = fallback
+      end
+      return truncate_text(fallback, limit)
+    end
+
+    return tostring(tab.tab_index + 1)
+  end)
+
+  if ok and computed and #computed > 0 then
+    return computed
+  end
+  return tostring(tab.tab_index + 1)
+end)
 
 -- =========================
 -- 1Password session sharing

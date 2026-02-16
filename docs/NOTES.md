@@ -81,3 +81,25 @@
 - `op_signin` runs `op signin` and writes `OP_SESSION_*` to `~/.op_session` (mode 600)
 - WezTerm watches `~/.op_session` via `add_to_config_reload_watch_list` — new panes get the var automatically
 - Existing panes pick it up on next prompt via `_op_check_session` in `PROMPT_COMMAND` (only re-reads on mtime change)
+
+## 2026-02-15: Stable WezTerm tab title truncation
+
+### What was done
+- Added a `format-tab-title` handler in `dot_wezterm.lua.tmpl` that truncates long tab labels and hostnames
+- Removed usernames from `user@host` patterns shown in tab text
+- Added a per-tab fallback title cache and defensive `pcall` fallback to tab index
+
+### Key Design Decisions
+- **Stability over live updates**: cache fallback titles per tab id to avoid rapid oscillation from dynamic pane title changes
+- **Manual names win**: if a tab was renamed with `set_title`, use that value (sanitized + truncated) instead of cache
+- **Fail-safe rendering**: if formatter logic errors, return tab index to avoid crashing/blank tab labels
+
+## 2026-02-15: WezTerm path-only tab titles follow-up
+
+### What was done
+- Removed `max_width`-driven title shrinking from `format-tab-title`
+- Switched fallback title parsing to path-only extraction from pane titles (drop `user@host:` / `host:` prefixes)
+
+### Key Design Decisions
+- **Single truncation policy**: use only `MAX_TAB_TITLE_LEN` for predictable label length
+- **Path-first context**: default tab labels now show path context without host/user noise

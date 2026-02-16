@@ -57,3 +57,19 @@
 ### Added
 - `dot_op_helper.sh`: `op_signin` wrapper that saves `OP_SESSION_*` to `~/.op_session`, plus `PROMPT_COMMAND` hook to auto-load it in existing panes
 - `dot_wezterm.lua.tmpl`: Reads `~/.op_session` and sets `config.set_environment_variables` for new panes; watches file for config reload
+
+## 2026-02-15: WezTerm tab title stability and truncation
+
+### Changed
+- `dot_wezterm.lua.tmpl`: Added a stable `format-tab-title` handler that:
+- truncates full tab labels (`MAX_TAB_TITLE_LEN = 28`)
+- truncates hostnames (`MAX_HOSTNAME_LEN = 12`) and shortens FQDN hostnames to first segment
+- hides usernames by rewriting `user@host` to `host`
+- caches fallback title per tab id to prevent oscillation between pane titles
+- uses `pcall` and falls back to tab index if formatting fails
+
+## 2026-02-15: WezTerm path-only title revision
+
+### Changed
+- `dot_wezterm.lua.tmpl`: `format-tab-title` now ignores `max_width` and uses fixed truncation (`MAX_TAB_TITLE_LEN`)
+- `dot_wezterm.lua.tmpl`: fallback parsing now extracts only path from pane titles (for example, `user@host: /path` -> `/path`)
