@@ -218,10 +218,11 @@ wezterm.on('format-tab-title', function(tab, _tabs, _panes, _cfg, _hover, _max_w
     return tostring(tab.tab_index + 1)
   end)
 
+  local num = tostring(tab.tab_index + 1)
   if ok and computed and #computed > 0 then
-    return computed
+    return num .. ':' .. computed
   end
-  return tostring(tab.tab_index + 1)
+  return num
 end)
 
 -- =========================
