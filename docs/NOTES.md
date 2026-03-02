@@ -103,3 +103,13 @@
 ### Key Design Decisions
 - **Single truncation policy**: use only `MAX_TAB_TITLE_LEN` for predictable label length
 - **Path-first context**: default tab labels now show path context without host/user noise
+
+## 2026-02-15: WezTerm shell integration auto-setup
+
+### What was done
+- Added `.chezmoiexternal.toml.tmpl` entry to fetch `wezterm.sh` from WezTerm upstream into `~/.local/share/wezterm/shell-integration/wezterm.sh`
+- Updated `dot_bashrc.tmpl` to source the script automatically when running inside WezTerm (`WEZTERM_PANE` set)
+
+### Key Design Decisions
+- **Upstream source of truth**: fetch script directly from `wezterm/main` so integration stays aligned with WezTerm updates
+- **Runtime guard**: source only when inside WezTerm and file exists, avoiding unnecessary shell startup work elsewhere

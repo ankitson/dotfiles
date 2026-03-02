@@ -73,3 +73,11 @@
 ### Changed
 - `dot_wezterm.lua.tmpl`: `format-tab-title` now ignores `max_width` and uses fixed truncation (`MAX_TAB_TITLE_LEN`)
 - `dot_wezterm.lua.tmpl`: fallback parsing now extracts only path from pane titles (for example, `user@host: /path` -> `/path`)
+
+## 2026-02-15: WezTerm shell integration auto-setup
+
+### Added
+- `.chezmoiexternal.toml.tmpl`: Added external file mapping for `~/.local/share/wezterm/shell-integration/wezterm.sh` from WezTerm upstream
+
+### Changed
+- `dot_bashrc.tmpl`: Auto-sources `wezterm.sh` when running inside WezTerm (`WEZTERM_PANE` is set) and the integration file is present

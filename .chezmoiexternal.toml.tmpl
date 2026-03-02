@@ -17,6 +17,13 @@
 {{ end -}}
   refreshPeriod = "24h"
 
+{{ if ne .chezmoi.os "windows" -}}
+[".local/share/wezterm/shell-integration/wezterm.sh"]
+  type = "file"
+  url = "https://raw.githubusercontent.com/wezterm/wezterm/main/assets/shell-integration/wezterm.sh"
+  refreshPeriod = "24h"
+{{ end -}}
+
 {{ if eq .chezmoi.os "windows" -}}
 ["AppData/Roaming/Microsoft/Windows/Start Menu/Programs/Startup/wezterm-quake.ahk"]
   type = "file"

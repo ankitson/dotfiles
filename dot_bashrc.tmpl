@@ -156,6 +156,13 @@ eval "$(uv generate-shell-completion bash)"
 eval "$(uvx --generate-shell-completion bash)"
 {{ end -}}
 
+# WezTerm shell integration
+WEZTERM_SHELL_INTEGRATION="$HOME/.local/share/wezterm/shell-integration/wezterm.sh"
+if [ -n "${WEZTERM_PANE:-}" ] && [ -f "$WEZTERM_SHELL_INTEGRATION" ]; then
+  . "$WEZTERM_SHELL_INTEGRATION"
+fi
+unset WEZTERM_SHELL_INTEGRATION
+
 # Quake terminal session
 if [ -n "${QUAKE}" ] && [ -z "${TMUX}" ]; then
   tmux new-session -A -s quake
