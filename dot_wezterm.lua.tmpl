@@ -125,6 +125,8 @@ config.keys = {
   { key = 'RightArrow', mods = 'LEADER', action = act.ActivatePaneDirection 'Right' },
   { key = 'PageUp', mods = 'SHIFT', action = act.ScrollByPage(-1) },
   { key = 'PageDown', mods = 'SHIFT', action = act.ScrollByPage(1) },
+  { key = 'UpArrow',   mods = 'CTRL|SHIFT', action = wezterm.action.ScrollToPrompt(-1) },
+  { key = 'DownArrow', mods = 'CTRL|SHIFT', action = wezterm.action.ScrollToPrompt(1) },
 
   -- Zoom pane
   { key = 'z', mods = 'LEADER', action = act.TogglePaneZoomState },
