@@ -92,7 +92,7 @@ alias ct='cargo_test_stdout'
 {{- end }}
 
 rsync_cp() {
-  rsync -vhrazP "$1" "$2"
+  rsync -vhrazP "$@"
 }
 alias rscp='rsync_cp'
 

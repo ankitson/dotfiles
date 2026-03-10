@@ -1,5 +1,25 @@
 # Chezmoi Dotfiles - Notes
 
+## 2026-03-02: Restore chezmoi source-tracking
+
+### What was done
+- Repointed `~/.local/share/chezmoi` toward `ssh://git@git.home.ankitson.com:1024/ankitson/dotfiles.git`, fetched the remote, and reset `main` to `origin/main` so the source repo matches this tree again.
+- Confirmed the working tree is clean (git status shows no working-tree or staging diffs) and that `chezmoi` sees the expected commit (`36d1427`).
+- Left the previous clankerpedia copy untouched so the history is still available if we need to inspect it.
+
+### Next steps
+- Run `chezmoi update --refresh-externals --force` the next time dotfiles cover updates that pull externals so that the local source stays synchronized.
+
+## 2026-03-02: Sync bashrc env sources
+
+### What was done
+- Added `.opencode/bin` and `.bun/bin` to the consolidated PATH block in `dot_bashrc.tmpl` so the template now reflects the live `~/.bashrc`.
+- Used `onepasswordRead "op://x/bearerToken"` inside the template so `X_BEARER_TOKEN` is exported from the 1Password secret in the same pattern as the SSH keys, keeping the bearer token sourcing declarative.
+- Confirmed `chezmoi diff ~/.bashrc` reports only the expected block changes.
+
+### Next steps
+- Sign into 1Password (`op signin`) before running `chezmoi apply --refresh-externals --force` so `onepasswordRead` can fetch the bearer token and SSH keys.
+
 ## 2026-01-30: v2 Reorganization Complete
 
 ### What was done

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-03-02: Sync bashrc environment
+
+### Changed
+- `dot_bashrc.tmpl`: include `.opencode/bin` and `.bun/bin` in the consolidated PATH block so the shared template now matches the live `~/.bashrc`.
+- `dot_bashrc.tmpl`: source `X_BEARER_TOKEN` via `onepasswordRead "op://x/bearerToken"` so the bearer token follows the same declarative 1Password helper pattern as the SSH keys.
+
 ## 2026-01-31: WezTerm template + macOS portability
 
 ### Added

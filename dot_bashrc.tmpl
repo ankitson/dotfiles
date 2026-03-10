@@ -90,7 +90,7 @@ export JAVA_HOME={{ .javaHome | quote }}
 {{- $homeDir := .chezmoi.homeDir -}}
 {{- $paths := list -}}
 {{- /* Home-relative paths (shared) */ -}}
-{{- range (list ".local/bin/vendor" "go/bin" ".cargo/bin" ".local/bin" ".local/share/coursier/bin") -}}
+{{- range (list ".local/bin/vendor" "go/bin" ".cargo/bin" ".local/bin" ".local/share/coursier/bin" ".opencode/bin" ".bun/bin") -}}
 {{-   $p := joinPath $homeDir . -}}
 {{-   if stat $p -}}
 {{-     $paths = mustAppend $paths $p -}}
@@ -132,6 +132,12 @@ export PATH={{ toStrings $paths | join ":" }}:$PATH
 {{ if .cudaPath -}}
 export LD_LIBRARY_PATH="{{ .cudaPath }}/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 {{ end -}}
+{{- if .personal -}}
+{{- $bearerToken := onepasswordRead "op://clankers/x/bearerToken" -}}
+if [ -z "${X_BEARER_TOKEN:-}" ]; then
+  export X_BEARER_TOKEN={{ $bearerToken | quote }}
+fi
+{{- end -}}
 
 # ======================
 # Tool initialization
