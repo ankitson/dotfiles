@@ -87,3 +87,11 @@
 
 ### Changed
 - `dot_bashrc.tmpl`: Auto-sources `wezterm.sh` when running inside WezTerm (`WEZTERM_PANE` is set) and the integration file is present
+
+## 2026-03-11: Windows PowerShell profile
+
+### Added
+- `Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1`: Windows PowerShell profile from `~/Documents/WindowsPowerShell/`.
+
+### Changed
+- `.chezmoiignore.tmpl`: Ignore `Documents/WindowsPowerShell/**` when `chezmoi.os` is not `windows`.

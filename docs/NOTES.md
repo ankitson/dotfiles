@@ -133,3 +133,9 @@
 ### Key Design Decisions
 - **Upstream source of truth**: fetch script directly from `wezterm/main` so integration stays aligned with WezTerm updates
 - **Runtime guard**: source only when inside WezTerm and file exists, avoiding unnecessary shell startup work elsewhere
+
+## 2026-03-11: Add Windows PowerShell profile
+
+### What was done
+- Added `Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1` to the chezmoi source tree.
+- Updated `.chezmoiignore.tmpl` to ignore `Documents/WindowsPowerShell/**` on non-Windows hosts.
