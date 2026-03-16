@@ -96,6 +96,11 @@ rsync_cp() {
 }
 alias rscp='rsync_cp'
 
+rsync_mv() {
+  rsync -vhrazP --remove-source-files "$@"
+}
+alias rsmv='rsync_mv'
+
 {{- if lookPath "just" }}
 just_choose() {
   if [ "$#" -eq 0 ]; then
