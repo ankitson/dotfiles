@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-05-26: Pi extensions — env-awareness, local browser, drop code_execute
+
+Now that `pi` runs *inside* the `devbox` container (rather than calling into it):
+
+### Added
+- `private_dot_pi/private_agent/extensions/environment.ts`: injects container runtime context into the system prompt via the `before_agent_start` event (shared `/projects` mount, host home at `/mnt/host/home/ankit`, ports `3000-3100` published 1:1 to the host for serving web apps, SSH on 2201, GPU/DISPLAY). Guarded by a devbox detection check (`/mnt/host/home/ankit` mount / hostname) so it does NOT fire when the same dotfiles run on the host. Also registers a `/env` command.
+- `private_dot_pi/private_agent/extensions/browser-tools.ts`: `browser_screenshot` rewritten to be self-contained and local — drives the container's bundled Playwright (Chromium, headless) via an inline node script in `os.tmpdir()`. No nested container, no dependency on a pre-placed `/projects/pi_screenshot.py`.
+- `private_dot_pi/private_agent/extensions-available/code_execute.ts`: the old `code_execute` tool, kept as reference but deliberately OUTSIDE the auto-discovered `extensions/` dir so it does not load (pi's built-in `bash` already covers it).
+
+### Removed
+- `private_dot_pi/private_agent/extensions/devbox-tools.ts`: split into `browser-tools.ts` (browser_screenshot, now local) and `extensions-available/code_execute.ts` (not loaded).
+
+### Changed
+- `tools-command.ts` (`/tools`): updated listing — built-in vs custom tools, dropped `code_execute`, browser is now "local Playwright", lists `/goal`, `/env`, `/tools`.
+
+### Notes
+- Foldable thinking/tool blocks are native in pi: `ctrl+t` toggles thinking, `ctrl+o` toggles tool output. No config needed.
+- On an already-running container, `chezmoi apply` won't delete the now-removed `devbox-tools.ts`; remove it once with `rm ~/.pi/agent/extensions/devbox-tools.ts` then `/reload`. Fresh image builds are clean.
+
 ## 2026-05-26: Pi agent secrets via 1Password (fix "No models available")
 
 ### Added
