@@ -15,6 +15,9 @@ Now that `pi` runs *inside* the `devbox` container (rather than calling into it)
 ### Changed
 - `tools-command.ts` (`/tools`): updated listing — built-in vs custom tools, dropped `code_execute`, browser is now "local Playwright", lists `/goal`, `/env`, `/tools`.
 
+### Fixed
+- `goal-mode.ts`: the goal reminder hooked a non-existent `message_sent` event (silent no-op). Ported to the documented `before_agent_start` hook, which now appends the goal reminder to the system prompt each prompt. Also fixed the status indicator: was misusing `pi.setLabel` (which labels session-tree entries); now uses `ctx.ui.setStatus`. Kickoff uses `pi.sendUserMessage` (string) instead of `pi.sendMessage` (which expects a message object).
+
 ### Notes
 - Foldable thinking/tool blocks are native in pi: `ctrl+t` toggles thinking, `ctrl+o` toggles tool output. No config needed.
 - On an already-running container, `chezmoi apply` won't delete the now-removed `devbox-tools.ts`; remove it once with `rm ~/.pi/agent/extensions/devbox-tools.ts` then `/reload`. Fresh image builds are clean.

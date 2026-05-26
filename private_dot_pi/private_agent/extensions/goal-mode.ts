@@ -1,83 +1,80 @@
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Type } from "@sinclair/typebox";
 
+// Persistent "goal" mode: set a session goal, and pi re-injects it into the
+// system prompt on every prompt until you complete or clear it.
 export default function (pi: ExtensionAPI) {
   let activeGoal: string | null = null;
+  const STATUS_ID = "goal";
 
-  // Update Goal Tool
+  const reminder = (goal: string) =>
+    `[ACTIVE GOAL] You are working toward a persistent goal: "${goal}". ` +
+    `Keep going until it is verified complete, then call the update_goal tool with status "completed". ` +
+    `If you get stuck, call update_goal with status "blocked" and explain why.`;
+
+  const notify = (ctx: any, msg: string) => {
+    if (ctx && ctx.ui && typeof ctx.ui.notify === "function") ctx.ui.notify(msg, "info");
+    else console.log(msg);
+  };
+
+  const setGoalStatus = (ctx: any) => {
+    if (!ctx || !ctx.ui || typeof ctx.ui.setStatus !== "function") return;
+    ctx.ui.setStatus(STATUS_ID, activeGoal ? `🎯 ${activeGoal.slice(0, 40)}` : undefined);
+  };
+
+  // Tool the model calls to report progress / completion. ctx is the 5th arg.
   pi.registerTool({
     name: "update_goal",
     label: "Update Goal",
-    description: "Mark the active persistent goal as complete or report progress",
+    description: "Report progress on the active persistent goal, or mark it complete/blocked",
     parameters: Type.Object({
-      status: Type.String({ description: "The status of the goal (e.g., 'completed', 'blocked', 'in_progress')" }),
-      message: Type.Optional(Type.String({ description: "A summary message of the outcome" }))
+      status: Type.String({ description: "'completed', 'blocked', or 'in_progress'" }),
+      message: Type.Optional(Type.String({ description: "A summary of the outcome or progress" })),
     }),
-    execute: async (toolCallId, params) => {
+    async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
       if (params.status === "completed") {
         activeGoal = null;
-        try {
-          if (typeof (pi as any).setLabel === "function") {
-            (pi as any).setLabel("🔋 pi active");
-          }
-        } catch {}
-        return { content: [{ type: "text", text: `Goal marked as completed! ${params.message || ""}` }] };
+        setGoalStatus(ctx);
+        return { content: [{ type: "text", text: `✅ Goal completed. ${params.message || ""}`.trim() }] };
       }
-      return { content: [{ type: "text", text: `Goal status updated to: ${params.status}. ${params.message || ""}` }] };
-    }
+      return { content: [{ type: "text", text: `Goal status: ${params.status}. ${params.message || ""}`.trim() }] };
+    },
   });
 
-  // Goal Command: Sets or manages session-level persistent goals
+  // /goal <objective> | /goal clear
   pi.registerCommand("goal", {
     description: "Set or manage a persistent goal for this session",
     handler: async (args, ctx) => {
-      const objective = args || "";
-      if (!objective.trim()) {
-        const statusMsg = activeGoal ? `Active Goal: ${activeGoal}` : "No active goal set. Usage: /goal <objective>";
-        if (ctx && ctx.ui && typeof ctx.ui.notify === "function") {
-          ctx.ui.notify(statusMsg);
-        } else {
-          console.log(statusMsg);
-        }
+      const objective = (args || "").trim();
+
+      if (!objective) {
+        notify(ctx, activeGoal ? `Active goal: ${activeGoal}` : "No active goal. Usage: /goal <objective>  (or /goal clear)");
         return;
       }
 
       if (objective === "clear" || objective === "none") {
         activeGoal = null;
-        if (ctx && ctx.ui && typeof ctx.ui.notify === "function") {
-          ctx.ui.notify("Goal cleared.");
-        } else {
-          console.log("Goal cleared.");
-        }
-        try {
-          if (typeof (pi as any).setLabel === "function") {
-            (pi as any).setLabel("🔋 pi active");
-          }
-        } catch {}
+        setGoalStatus(ctx);
+        notify(ctx, "Goal cleared.");
         return;
       }
 
       activeGoal = objective;
-      if (ctx && ctx.ui && typeof ctx.ui.notify === "function") {
-        ctx.ui.notify(`Goal set: ${activeGoal}`);
-      } else {
-        console.log(`Goal set: ${activeGoal}`);
-      }
-      
-      try {
-        if (typeof (pi as any).setLabel === "function") {
-          (pi as any).setLabel(`🎯 Goal: ${activeGoal.substring(0, 30)}...`);
-        }
-      } catch {}
-      
-      await pi.sendMessage(`[SYSTEM] New persistent goal has been set: "${activeGoal}". Please outline your plan and begin working towards it using your available tools. Repeat tool calls as needed until you verify the goal is complete.`);
-    }
+      setGoalStatus(ctx);
+      notify(ctx, `Goal set: ${activeGoal}`);
+
+      // Kick off an autonomous turn toward the goal (agent is idle here).
+      await pi.sendUserMessage(
+        `New persistent goal: "${activeGoal}". Outline a brief plan, then start working toward it using your tools. Call update_goal when complete or blocked.`,
+      );
+    },
   });
 
-  // System Reminder Injector
-  pi.on("message_sent" as any, (event: any) => {
-    if (activeGoal && event?.message) {
-      event.message += `\n\n[SYSTEM REMINDER] Active goal: "${activeGoal}". Continue working towards this goal until it is verified complete. Use the update_goal tool when done.`;
-    }
+  // Fires once per user prompt, before the agent loop. The documented hook for
+  // injecting context (the old `message_sent` event does not exist).
+  pi.on("before_agent_start", async (event: any, ctx: any) => {
+    setGoalStatus(ctx);
+    if (!activeGoal) return;
+    return { systemPrompt: `${event.systemPrompt}\n\n${reminder(activeGoal)}` };
   });
 }
