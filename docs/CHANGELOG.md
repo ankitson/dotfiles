@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-05-26: Pi sessions from devbox flow into AgentsView
+
+### Added
+- `private_dot_pi/private_agent/settings.json.tmpl` (was `settings.json`): inside the devbox container (detected via `stat "/mnt/host/home/ankit"`, the host-home bind mount), set pi's `sessionDir` to `/mnt/host/home/ankit/.pi/agent/sessions` — i.e. the host's `~/.pi/agent/sessions`. AgentsView already ingests that directory (`PI_DIR=/agents/pi`), so pi sessions created inside devbox now appear in AgentsView automatically, with no AgentsView/compose change. On the host and on the Hermes `agent-devbox` (no such mount) the line is omitted, keeping pi's default session location. Note: devbox and host pi sessions commingle in that dir (acceptable — no per-machine tagging).
+
 ## 2026-05-26: Pi extensions — env-awareness, local browser, drop code_execute
 
 Now that `pi` runs *inside* the `devbox` container (rather than calling into it):

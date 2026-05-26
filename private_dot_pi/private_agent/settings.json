@@ -1,6 +1,0 @@
-{
-  "lastChangelogVersion": "0.75.5",
-  "defaultProvider": "litellm",
-  "defaultModel": "opencode/deepseek-v4-flash-free",
-  "defaultThinkingLevel": "high"
-}

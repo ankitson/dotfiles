@@ -1,0 +1,15 @@
+{{/*
+  Inside the devbox container the host home is bind-mounted at
+  /mnt/host/home/ankit, so we point pi's sessionDir at the host's
+  ~/.pi/agent/sessions. AgentsView already ingests that dir, so devbox
+  pi sessions show up in AgentsView automatically with no compose change.
+  The sessionDir line is omitted on the host and on the Hermes agent-devbox
+  (neither has that mount), so they keep pi's default session location.
+*/ -}}
+{
+  "lastChangelogVersion": "0.75.5",
+  "defaultProvider": "litellm",
+  "defaultModel": "opencode/deepseek-v4-flash-free",
+  "defaultThinkingLevel": "high"{{ if stat "/mnt/host/home/ankit" }},
+  "sessionDir": "/mnt/host/home/ankit/.pi/agent/sessions"{{ end }}
+}
