@@ -3,7 +3,7 @@
     "litellm": {
       "baseUrl": "https://litellm.home.ankitson.com/v1",
       "api": "openai-completions",
-      "apiKey": "$LITELLM_API_KEY",
+      "apiKey": {{ onepasswordRead "op://clankers/litellm/password" | quote }},
       "models": [
         {
           "id": "opencode/deepseek-v4-flash-free",

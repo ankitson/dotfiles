@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-26: Pi agent secrets via 1Password (fix "No models available")
+
+### Added
+- `private_dot_pi/private_agent/models.json.tmpl`: LiteLLM provider `apiKey` injected from `op://clankers/litellm/password` via `onepasswordRead`, matching the SSH key / `X_BEARER_TOKEN` declarative pattern.
+- `private_dot_pi/private_agent/auth.json.tmpl`: `opencode` and `deepseek` provider keys injected from `op://clankers/opencode-zen/password` and `op://clankers/deepseek/password`.
+- `.chezmoiignore.tmpl`: ignore `.pi` on non-personal machines (mirrors the `.ssh` rule) so `onepasswordRead` is never called where 1Password is unavailable.
+
+### Removed
+- `private_dot_pi/private_agent/models.json` and `auth.json`: static files that hardcoded the non-functional literal placeholders `"$LITELLM_API_KEY"` / `"LITELLM_API_KEY"`. Pi reads `apiKey` as a literal string (no env expansion), so these authenticated with garbage and produced "No models available" in the devbox container. Replaced by the templated versions above.
+
 ## 2026-03-02: Sync bashrc environment
 
 ### Changed

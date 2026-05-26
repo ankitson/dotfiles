@@ -1,5 +1,20 @@
 # Chezmoi Dotfiles - Notes
 
+## 2026-05-26: Pi agent "No models available" fix
+
+### What was done
+- Root cause: pi reads `apiKey` in `~/.pi/agent/models.json` as a **literal string** — it does not expand `$LITELLM_API_KEY`. The previous static `models.json`/`auth.json` shipped literal placeholders (`"$LITELLM_API_KEY"`, `"LITELLM_API_KEY"`), so pi inside the `devbox` container authenticated with garbage and reported "No models available".
+- Converted both to chezmoi templates that inject the real keys at apply time via `onepasswordRead`, the same declarative pattern already used for SSH keys and `X_BEARER_TOKEN`:
+  - `models.json.tmpl` → `op://clankers/litellm/password` (LiteLLM gateway, the `litellm` provider / default).
+  - `auth.json.tmpl` → `op://clankers/opencode-zen/password` and `op://clankers/deepseek/password`.
+- Added `.pi` to the `not .personal` block of `.chezmoiignore.tmpl` so the templates are skipped on machines without 1Password.
+- Verified with `chezmoi execute-template` that both render to valid JSON and resolve to the real keys (litellm `sk-tdjK…`, opencode-zen `sk-uD17…`, deepseek `sk-a822…`), matching the host's working `~/.pi/agent` config.
+
+### Next steps
+- Sign into 1Password (`op signin`) before running `chezmoi apply` so `onepasswordRead` can fetch the pi keys (in `agent-devbox`, `OP_SERVICE_ACCOUNT_TOKEN` is already in env, so apply works non-interactively).
+- Rebuild the devbox image (`build.sh` now tags `ankit/devbox:1.5`) to bake pi in, then re-run `pi` in the container to confirm models list.
+- Unrelated but adjacent: `opencode.jsonc` still reads `{env:LITELLM_API_KEY}`, which nothing currently exports. If opencode also reports auth failures in the container, export it in `dot_bashrc.tmpl` via `onepasswordRead "op://clankers/litellm/password"` (same as `X_BEARER_TOKEN`).
+
 ## 2026-03-02: Restore chezmoi source-tracking
 
 ### What was done
