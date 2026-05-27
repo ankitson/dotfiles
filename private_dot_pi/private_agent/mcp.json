@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "fastmail": {
+      "url": "https://api.fastmail.com/mcp",
+      "auth": "oauth",
+      "autoAuth": true,
+      "lifecycle": "lazy",
+      "directTools": [
+        "list_mailboxes",
+        "get_recent_emails",
+        "list_calendars"
+      ]
+    }
+  }
+}
