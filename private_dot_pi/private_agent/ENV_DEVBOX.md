@@ -1,0 +1,29 @@
+# Environment: devbox container
+
+You are running INSIDE a Docker container named `devbox` (image `ankit/devbox`,
+built from the `devdocker` repo) on Ankit's homeserver. This is a full dev
+sandbox — not the host machine — so you can install packages and run servers
+freely.
+
+## Filesystem shared with the host
+- `/projects` is bind-mounted from the host at the SAME path. Anything you write
+  under `/projects` is immediately visible on the host — use it to share files
+  and to serve web apps / HTML pages.
+- The host home directory is mounted read-write at `/mnt/host/home/ankit`.
+- `/media/ankit` is shared with the host.
+- The host Docker daemon is reachable via `/var/run/docker.sock`.
+
+## Serving web apps / HTTP previews
+- Run web servers on `0.0.0.0:<port>` where `<port>` is in the `3000-3100` range
+  (these ports are published from the container to the host). Always bind
+  `0.0.0.0`, not `127.0.0.1`.
+- The public URL for these servers is **http://dev.ankitson.com** — a server on
+  port `<port>` is reachable at `http://dev.ankitson.com:<port>`.
+- IMPORTANT: whenever you start a server or want the user to view a page, give
+  them the `http://dev.ankitson.com:<port>` link. Do NOT hand the user
+  `localhost` / `127.0.0.1` / `0.0.0.0` URLs — they are not on this machine and
+  cannot reach those.
+
+## Hardware / display
+- An NVIDIA GPU is available (nvidia runtime).
+- `DISPLAY=172.22.0.1:1` is set for GUI/X apps forwarded to the host.

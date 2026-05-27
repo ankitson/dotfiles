@@ -10,6 +10,13 @@ logs/
 .pi/**
 {{ end }}
 
+{{/* Per-environment pi context files: only deploy on the devbox container */}}
+{{ if ne .chezmoi.hostname "devbox" }}
+.pi/agent/AGENTS.md
+.pi/agent/ENV.md
+.pi/agent/ENV_DEVBOX.md
+{{ end }}
+
 {{ if ne .chezmoi.os "darwin" }}
 .config/karabiner
 .config/karabiner/**

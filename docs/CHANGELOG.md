@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-05-26: Replace environment.ts extension with chezmoi-managed context files
+
+Drop the custom `environment.ts` pi extension in favor of native pi context files.
+
+- `private_dot_pi/private_agent/ENV_DEVBOX.md`: source of truth for the devbox runtime info (shared dirs, ports→host, `http://dev.ankitson.com:<port>` public URL, GPU/DISPLAY).
+- `private_dot_pi/private_agent/AGENTS.md.tmpl`: pi auto-loads `~/.pi/agent/AGENTS.md` as a global context file. It contains only `{{ include "...ENV_DEVBOX.md" }}` — pi has no in-file `@FILE.md` include (that syntax is CLI-only for prompt attachment), so chezmoi inlines the whole ENV file at apply time. Single source = ENV_DEVBOX.md, nothing hand-written.
+- `symlink_ENV.md` → `ENV_DEVBOX.md`: chezmoi-managed symlink so `~/.pi/agent/ENV.md` is a stable handle to this machine's env file.
+- `.chezmoiignore.tmpl`: these three are deployed only when `hostname == devbox` (host / agent-devbox keep their defaults).
+- Removed `extensions/environment.ts` (and its `/env` command). Env info now rides in the system context automatically via AGENTS.md.
+
 ## 2026-05-26: Fix bashrc syntax error from X_BEARER_TOKEN quoting
 
 - `dot_bashrc.tmpl`: `export X_BEARER_TOKEN={{ $bearerToken | quote }}` produced a double-quoted shell string; Go's `quote` does NOT escape backticks or `$`, so a token value containing them (the `op://clankers/x/bearerToken` item was rotated) opened an unclosed command substitution → `~/.bashrc: syntax error: unexpected end of file` on freshly-rendered machines (hit on the devbox after re-apply). Now base64-encode the secret at render time (`b64enc`) and decode at runtime (`base64 -d`) inside single quotes — safe for any token contents. Verified lossless round-trip against a value containing `` ` ``, `$()`, `"`, `'`, `\`.
