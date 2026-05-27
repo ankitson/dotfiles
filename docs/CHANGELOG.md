@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-26: Split pi context — generic AGENTS.md from clankerpedia, env stays private
+
+Refines the previous entry. clankerpedia (public) owns the shared, machine-agnostic
+agent instructions; the private dotfiles own this machine's env (internal infra).
+
+- `private_dot_pi/private_agent/symlink_AGENTS.md.tmpl` → `~/.agents/AGENTS.md`: pi now uses the same global agent instructions as `~/.claude` and `~/.codex` (clankerpedia). Deploys on all personal machines.
+- `private_dot_pi/private_agent/symlink_APPEND_SYSTEM.md` → `ENV_DEVBOX.md`: pi appends the devbox env to its system prompt via `~/.pi/agent/APPEND_SYSTEM.md` (devbox-only). Internal infra (hostnames/IPs/ports) stays in this private repo — never in public clankerpedia.
+- Removed `AGENTS.md.tmpl` (the chezmoi `include` of ENV_DEVBOX.md) and the redundant `ENV.md` symlink.
+- `.chezmoiignore.tmpl`: only `ENV_DEVBOX.md` + `APPEND_SYSTEM.md` are devbox-gated now; `AGENTS.md` (clankerpedia symlink) deploys everywhere personal.
+
+Net on devbox: `~/.pi/agent/AGENTS.md` → clankerpedia generic instructions; `~/.pi/agent/APPEND_SYSTEM.md` → `ENV_DEVBOX.md` (this box's environment). On other machines: just the clankerpedia AGENTS.md.
+
 ## 2026-05-26: Replace environment.ts extension with chezmoi-managed context files
 
 Drop the custom `environment.ts` pi extension in favor of native pi context files.

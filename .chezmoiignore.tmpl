@@ -10,11 +10,12 @@ logs/
 .pi/**
 {{ end }}
 
-{{/* Per-environment pi context files: only deploy on the devbox container */}}
+{{/* devbox-only pi env files (contain internal infra — kept in this private
+     repo, never in public clankerpedia). pi's AGENTS.md is the clankerpedia
+     symlink and deploys on all personal machines, so it's NOT listed here. */}}
 {{ if ne .chezmoi.hostname "devbox" }}
-.pi/agent/AGENTS.md
-.pi/agent/ENV.md
 .pi/agent/ENV_DEVBOX.md
+.pi/agent/APPEND_SYSTEM.md
 {{ end }}
 
 {{ if ne .chezmoi.os "darwin" }}
