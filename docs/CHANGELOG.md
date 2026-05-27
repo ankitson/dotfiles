@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-05-26: Fix bashrc syntax error from X_BEARER_TOKEN quoting
+
+- `dot_bashrc.tmpl`: `export X_BEARER_TOKEN={{ $bearerToken | quote }}` produced a double-quoted shell string; Go's `quote` does NOT escape backticks or `$`, so a token value containing them (the `op://clankers/x/bearerToken` item was rotated) opened an unclosed command substitution → `~/.bashrc: syntax error: unexpected end of file` on freshly-rendered machines (hit on the devbox after re-apply). Now base64-encode the secret at render time (`b64enc`) and decode at runtime (`base64 -d`) inside single quotes — safe for any token contents. Verified lossless round-trip against a value containing `` ` ``, `$()`, `"`, `'`, `\`.
+
 ## 2026-05-26: Move to off-the-shelf pi plugins (first-party + community)
 
 Prefer maintained packages/first-party extensions over hand-rolled ones.
