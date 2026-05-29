@@ -31,5 +31,12 @@
     }
   },
   "model": "litellm/claude-sonnet-4-5",
-  "small_model": "litellm/deepseek-chat"
+  "small_model": "litellm/deepseek-chat",
+  "mcp": {
+    "fastmail": {
+      "type": "remote",
+      "url": "https://api.fastmail.com/mcp",
+      "enabled": true
+    }
+  }
 }
