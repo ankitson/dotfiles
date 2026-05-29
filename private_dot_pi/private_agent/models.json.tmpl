@@ -1,41 +1,12 @@
+{{/*
+  Provider/model registration. The `litellm` provider is now registered
+  dynamically by the `litellm-live-models.ts` extension (it fetches
+  /v1/models at startup); the `opencode` provider is similarly registered
+  by `opencode-live-models.ts`. Nothing else is hardcoded here — pi's
+  bundled @earendil-works/pi-ai catalog handles anthropic/openai/google/
+  deepseek defaults. Add a static entry below only when a provider needs
+  config that the bundled catalog doesn't supply.
+*/ -}}
 {
-  "providers": {
-    "litellm": {
-      "baseUrl": "https://litellm.home.ankitson.com/v1",
-      "api": "openai-completions",
-      "apiKey": {{ onepasswordRead "op://clankers/litellm/password" | quote }},
-      "models": [
-        {
-          "id": "opencode/deepseek-v4-flash-free",
-          "name": "DeepSeek V4 Flash Free",
-          "contextWindow": 128000,
-          "reasoning": true
-        },
-        {
-          "id": "deepseek-chat",
-          "name": "DeepSeek Chat",
-          "contextWindow": 128000,
-          "reasoning": true
-        },
-        {
-          "id": "claude-sonnet-4-5",
-          "name": "Claude Sonnet 4.5",
-          "contextWindow": 200000,
-          "reasoning": true
-        },
-        {
-          "id": "claude-opus-4-5",
-          "name": "Claude Opus 4.5",
-          "contextWindow": 200000,
-          "reasoning": true
-        },
-        {
-          "id": "gemini-2.5-pro",
-          "name": "Gemini 2.5 Pro",
-          "contextWindow": 1000000,
-          "reasoning": true
-        }
-      ]
-    }
-  }
+  "providers": {}
 }
