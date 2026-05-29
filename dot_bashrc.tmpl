@@ -67,6 +67,11 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 # ===========
 # Environment
 # ===========
+
+# 1Password service account token for non-interactive `op read`.
+# File lives outside chezmoi/git per-machine — see ~/toolbox/skills/1password-cli/SKILL.md.
+[ -f ~/.config/op/service-account.env ] && . ~/.config/op/service-account.env
+
 {{ if lookPath "nvim" -}}
 export EDITOR=nvim
 {{ else -}}
