@@ -8,15 +8,6 @@
   url = "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
   refreshPeriod = "24h"
 
-["toolbox"]
-  type = "git-repo"
-{{ if .internal_network -}}
-  url = "ssh://git@git.home.ankitson.com:1024/ankitson/toolbox.git"
-{{ else -}}
-  url = "https://github.com/ankitson/toolbox.git"
-{{ end -}}
-  refreshPeriod = "15m"  # personal repo — pick up new bins/skills quickly
-
 {{ if ne .chezmoi.os "windows" -}}
 [".local/share/wezterm/shell-integration/wezterm.sh"]
   type = "file"
