@@ -133,14 +133,6 @@ export PATH={{ toStrings $paths | join ":" }}:$PATH
 {{ if .cudaPath -}}
 export LD_LIBRARY_PATH="{{ .cudaPath }}/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 {{ end -}}
-{{- if .personal -}}
-{{- $bearerToken := onepasswordRead "op://clankers/x/bearerToken" -}}
-if [ -z "${X_BEARER_TOKEN:-}" ]; then
-  # value is base64-encoded at render time so any chars (backtick, $, quotes) in
-  # the secret can't break sourcing; decoded back to the raw token at runtime.
-  export X_BEARER_TOKEN="$(printf %s '{{ $bearerToken | b64enc }}' | base64 -d)"
-fi
-{{- end -}}
 
 # ======================
 # Tool initialization
