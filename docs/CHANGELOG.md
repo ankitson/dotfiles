@@ -1,5 +1,72 @@
 # Changelog
 
+## 2026-05-26: Split pi context — generic AGENTS.md from clankerpedia, env stays private
+
+Refines the previous entry. clankerpedia (public) owns the shared, machine-agnostic
+agent instructions; the private dotfiles own this machine's env (internal infra).
+
+- `private_dot_pi/private_agent/symlink_AGENTS.md.tmpl` → `~/.agents/AGENTS.md`: pi now uses the same global agent instructions as `~/.claude` and `~/.codex` (clankerpedia). Deploys on all personal machines.
+- `private_dot_pi/private_agent/symlink_APPEND_SYSTEM.md` → `ENV_DEVBOX.md`: pi appends the devbox env to its system prompt via `~/.pi/agent/APPEND_SYSTEM.md` (devbox-only). Internal infra (hostnames/IPs/ports) stays in this private repo — never in public clankerpedia.
+- Removed `AGENTS.md.tmpl` (the chezmoi `include` of ENV_DEVBOX.md) and the redundant `ENV.md` symlink.
+- `.chezmoiignore.tmpl`: only `ENV_DEVBOX.md` + `APPEND_SYSTEM.md` are devbox-gated now; `AGENTS.md` (clankerpedia symlink) deploys everywhere personal.
+
+Net on devbox: `~/.pi/agent/AGENTS.md` → clankerpedia generic instructions; `~/.pi/agent/APPEND_SYSTEM.md` → `ENV_DEVBOX.md` (this box's environment). On other machines: just the clankerpedia AGENTS.md.
+
+## 2026-05-26: Replace environment.ts extension with chezmoi-managed context files
+
+Drop the custom `environment.ts` pi extension in favor of native pi context files.
+
+- `private_dot_pi/private_agent/ENV_DEVBOX.md`: source of truth for the devbox runtime info (shared dirs, ports→host, `http://dev.ankitson.com:<port>` public URL, GPU/DISPLAY).
+- `private_dot_pi/private_agent/AGENTS.md.tmpl`: pi auto-loads `~/.pi/agent/AGENTS.md` as a global context file. It contains only `{{ include "...ENV_DEVBOX.md" }}` — pi has no in-file `@FILE.md` include (that syntax is CLI-only for prompt attachment), so chezmoi inlines the whole ENV file at apply time. Single source = ENV_DEVBOX.md, nothing hand-written.
+- `symlink_ENV.md` → `ENV_DEVBOX.md`: chezmoi-managed symlink so `~/.pi/agent/ENV.md` is a stable handle to this machine's env file.
+- `.chezmoiignore.tmpl`: these three are deployed only when `hostname == devbox` (host / agent-devbox keep their defaults).
+- Removed `extensions/environment.ts` (and its `/env` command). Env info now rides in the system context automatically via AGENTS.md.
+
+## 2026-05-26: Fix bashrc syntax error from X_BEARER_TOKEN quoting
+
+- `dot_bashrc.tmpl`: `export X_BEARER_TOKEN={{ $bearerToken | quote }}` produced a double-quoted shell string; Go's `quote` does NOT escape backticks or `$`, so a token value containing them (the `op://clankers/x/bearerToken` item was rotated) opened an unclosed command substitution → `~/.bashrc: syntax error: unexpected end of file` on freshly-rendered machines (hit on the devbox after re-apply). Now base64-encode the secret at render time (`b64enc`) and decode at runtime (`base64 -d`) inside single quotes — safe for any token contents. Verified lossless round-trip against a value containing `` ` ``, `$()`, `"`, `'`, `\`.
+
+## 2026-05-26: Move to off-the-shelf pi plugins (first-party + community)
+
+Prefer maintained packages/first-party extensions over hand-rolled ones.
+
+### Changed
+- `settings.json.tmpl` packages: `["git:github.com/badlogic/pi-doom", "npm:pi-mcp-adapter", "npm:pi-subagents", "npm:pi-goal-x", "npm:pi-web-access"]`.
+  - `pi-goal-x` (tmonk/pi-goal-x) — persistent goal management w/ drafting, confirmation, independent completion auditor, multi-goal. Replaces custom `goal-mode.ts`.
+  - `pi-web-access` — `web_search` (Exa/Perplexity/Gemini), `code_search`, `fetch_content` (URLs, GitHub repos, YouTube, PDFs), curator UI. Replaces custom `web-tools.ts`. NOTE: defaults to Exa MCP (external) — drops the local SearXNG (`search.home.ankitson.com`) fallback our web-tools used.
+
+### Added
+- `settings.json.tmpl` `extensions`: reference pi's first-party bundled examples **in place** (not copied) via absolute paths under `{{ .chezmoi.homeDir }}/.local/lib/node_modules/@earendil-works/pi-coding-agent/examples/extensions/`:
+  - `tools.ts` — `/tools` interactive enable/disable tool selector (persists across reloads). Replaces the static `tools-command.ts` cheatsheet.
+  - `plan-mode/index.ts` — Plan Mode (read-only exploration; `/plan` or Ctrl+Alt+P; plan-step extraction + progress widget).
+  - Referencing instead of vendoring means they track the installed pi version and resolve their `@earendil-works/pi-*` imports from pi's own deps. Paths are templated to an absolute home dir (identical on host and devbox).
+
+### Removed
+- `extensions/goal-mode.ts` → pi-goal-x.
+- `extensions/web-tools.ts` → pi-web-access.
+- `extensions/tools-command.ts` → first-party tools.ts.
+
+### Kept (no off-the-shelf equivalent)
+- `extensions/environment.ts` (devbox runtime awareness), `extensions/browser-tools.ts` (Playwright screenshot — pi-web-access has no screenshot tool).
+
+## 2026-05-26: Pi packages (subagents + MCP) and global MCP config
+
+### Changed
+- `settings.json.tmpl`: declare `"packages": ["git:github.com/badlogic/pi-doom", "npm:pi-mcp-adapter", "npm:pi-subagents"]`.
+  - `pi-subagents` — maintained subagent package (tool `subagent`; commands `/run`, `/chain`, `/run-chain`, `/parallel`, `/subagents-doctor`; bundled skills/prompts) replacing the hand-rolled extension.
+  - `pi-mcp-adapter` — MCP support behind a single low-token proxy tool (`mcp({search})`), servers connect lazily.
+  - `pi-doom` — preserved (was already in the live host settings; declaring it keeps chezmoi from dropping it).
+- `tools-command.ts` (`/tools`): list the `subagent` tool + pi-subagents commands.
+
+### Added
+- `private_dot_pi/private_agent/mcp.json`: pi-global MCP config (`~/.pi/agent/mcp.json`) with the `fastmail` server (`https://api.fastmail.com/mcp`, `auth: oauth`, lazy, directTools). Promoted from a project-only `.pi/mcp.json`. No secrets in the file — OAuth tokens live per-machine in `~/.pi/agent/mcp-oauth/` (never committed); first use on a new machine triggers the OAuth flow.
+
+### Removed
+- `extensions/subagent-tools.ts`: replaced by the pi-subagents package.
+
+### Notes
+- User-settings packages are NOT auto-installed on pi startup (only project `.pi/settings.json` packages are). So `first-run.sh` / `agent-first-run.sh` (in the devdocker repo) now run `pi update --extensions` after `chezmoi apply` to fetch declared packages. On an already-running container, run `pi update --extensions` once.
+
 ## 2026-05-26: Pi sessions from devbox flow into AgentsView
 
 ### Added

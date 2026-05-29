@@ -10,6 +10,13 @@ logs/
 .pi/**
 {{ end }}
 
+{{/* devbox-only pi env files (contain internal infra — kept in this private
+     repo, never in public clankerpedia). pi's AGENTS.md is the clankerpedia
+     symlink and deploys on all personal machines, so it's NOT listed here. */}}
+{{ if ne .chezmoi.hostname "devbox" }}
+.pi/agent/APPEND_SYSTEM.md
+{{ end }}
+
 {{ if ne .chezmoi.os "darwin" }}
 .config/karabiner
 .config/karabiner/**

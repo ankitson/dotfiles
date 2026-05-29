@@ -1,0 +1,13 @@
+{{/*
+  Project-scope pi settings (~/.pi/settings.json). This file enables the
+  user's local extensions in agent/extensions/. pi looks at this in addition
+  to ~/.pi/agent/settings.json (the global defaults file).
+
+  Add new local extensions here as `agent/extensions/<file>.ts`. Paths are
+  resolved relative to ~/.pi/.
+*/ -}}
+{
+  "packages": [
+    "agent/extensions/opencode-live-models.ts"
+  ]
+}
