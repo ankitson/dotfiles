@@ -15,7 +15,7 @@
 {{ else -}}
   url = "https://github.com/ankitson/toolbox.git"
 {{ end -}}
-  refreshPeriod = "24h"
+  refreshPeriod = "15m"  # personal repo — pick up new bins/skills quickly
 
 {{ if ne .chezmoi.os "windows" -}}
 [".local/share/wezterm/shell-integration/wezterm.sh"]
