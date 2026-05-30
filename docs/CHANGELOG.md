@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-05-29
+
+### Toolbox bootstrap
+- Added `run_before_clone-toolbox.sh.tmpl` to clone `/projects/toolbox` only when the canonical clone is missing.
+- Added `symlink_dot_agents.tmpl` so `~/.agents` resolves to the shared toolbox clone.
+
 ## 2026-05-26: Split pi context — generic AGENTS.md from clankerpedia, env stays private
 
 Refines the previous entry. clankerpedia (public) owns the shared, machine-agnostic

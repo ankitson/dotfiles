@@ -1,5 +1,21 @@
 # Chezmoi Dotfiles - Notes
 
+## 2026-05-29: Toolbox bootstrap via canonical /projects clone
+
+### What was done
+- Added a minimal `run_before_clone-toolbox.sh.tmpl` script that clones `toolbox` to `/projects/toolbox` only when `/projects/toolbox/.git` is absent.
+- Added `symlink_dot_agents.tmpl` so `~/.agents` points at `/projects/toolbox`.
+
+### Key Design Decisions
+- Keep `/projects/toolbox` as the single canonical clone because `/projects` is the shared host/container path.
+- Keep `~/toolbox` and agent skill paths as symlinks into that canonical clone.
+- Do not use a chezmoi external for toolbox because externals target paths under `$HOME`, which creates per-container clones and drift.
+- Keep the bootstrap script intentionally small: no stale-directory migrations, no backups, no bin-script behavior changes.
+
+### Next steps
+- Apply on a clean host to confirm `run_before_clone-toolbox.sh` clones before symlink creation.
+- On machines with an existing real `~/.agents` directory, remove or move it once before applying the new symlink.
+
 ## 2026-05-26: Pi agent "No models available" fix
 
 ### What was done

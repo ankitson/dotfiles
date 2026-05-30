@@ -1,0 +1,9 @@
+#!/bin/sh
+
+[ -d /projects/toolbox/.git ] && exit 0
+
+mkdir -p /projects
+git clone "{{ if .internal_network }}ssh://git@git.home.ankitson.com:1024/ankitson/toolbox.git{{ else }}https://github.com/ankitson/toolbox.git{{ end }}" /projects/toolbox || {
+  echo "chezmoi: failed to clone toolbox; continuing" >&2
+  exit 0
+}
