@@ -23,10 +23,19 @@ if [[ $- == *i* ]] && [ -t 0 ] && [ -t 1 ] \
   find "$_slog_dir" -type f -mtime +14 -delete 2>/dev/null
   _slog_base="$_slog_dir/$(date +%Y%m%d-%H%M%S)-pane${WEZTERM_PANE:-na}-$$"
   export SHELL_SESSION_LOG="$_slog_base.log"
+{{ if eq .chezmoi.os "darwin" -}}
+  # BSD script(1) on macOS: `script [-q] file [command ...]`. It has no
+  # util-linux-style separate timing/log options, so there's no .timing file
+  # (and thus no scriptreplay); we just capture the typescript log.
+  exec script -q "$_slog_base.log" "$BASH" -i
+{{ else -}}
+  # util-linux script(1): separate output + timing logs, replayable with
+  # `scriptreplay <base>.timing <base>.log`.
   exec script -q -f \
     --log-out "$_slog_base.log" \
     --log-timing "$_slog_base.timing" \
     --command "$BASH -i"
+{{ end -}}
 fi
 
 # ble.sh (bash line editor) — required for atuin's full bash integration.
