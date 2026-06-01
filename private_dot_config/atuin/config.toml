@@ -1,0 +1,15 @@
+# atuin configuration — https://docs.atuin.sh/configuration/config/
+# Local-first: history is stored in ~/.local/share/atuin/history.db.
+# Sync is OFF and requires an explicit `atuin login` (not configured here).
+auto_sync = false
+update_check = false
+
+# UI
+style = "compact"
+inline_height = 25
+show_preview = true
+search_mode = "fuzzy"
+filter_mode = "global"
+
+# Press Enter to run the selected command directly (set true to edit-then-run).
+enter_accept = false

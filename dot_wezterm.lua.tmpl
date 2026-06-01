@@ -58,7 +58,10 @@ config.hyperlink_rules = {}
 -- Terminal behavior
 -- =========================
 config.term = 'xterm-256color'
-config.scrollback_lines = 100000
+-- Kept small on purpose: durable history lives in atuin (commands) and
+-- ~/.local/share/shell-logs via script(1) (full output), so we don't need a
+-- huge in-pane buffer. Large scrollback makes mux reflow-on-resize pin the CPU.
+config.scrollback_lines = 5000
 config.enable_scroll_bar = false
 config.hide_tab_bar_if_only_one_tab = true
 config.use_fancy_tab_bar = true

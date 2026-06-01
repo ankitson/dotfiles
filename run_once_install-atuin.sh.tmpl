@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Install atuin (durable, searchable shell-history DB) if not already present.
+# chezmoi run_once: executes a single time per machine (at devbox image build
+# and on host `chezmoi apply`). Binary only — shell integration lives in .bashrc.
+set -euo pipefail
+
+if command -v atuin >/dev/null 2>&1; then
+  echo "atuin already installed: $(command -v atuin)"
+  exit 0
+fi
+
+{{ if eq .chezmoi.os "darwin" -}}
+if command -v brew >/dev/null 2>&1; then
+  brew install atuin
+  atuin import auto || true
+  exit 0
+fi
+{{ end -}}
+
+# Linux (and macOS-without-brew) fallback: fetch the released binary.
+arch="$(uname -m)"
+case "$arch" in
+  x86_64 | amd64) arch="x86_64" ;;
+  aarch64 | arm64) arch="aarch64" ;;
+  *) echo "atuin: unsupported arch '$arch'" >&2; exit 1 ;;
+esac
+case "{{ .chezmoi.os }}" in
+  linux) target="${arch}-unknown-linux-gnu" ;;
+  darwin) target="${arch}-apple-darwin" ;;
+  *) echo "atuin: unsupported os '{{ .chezmoi.os }}'" >&2; exit 1 ;;
+esac
+
+url="https://github.com/atuinsh/atuin/releases/latest/download/atuin-${target}.tar.gz"
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+
+echo "Installing atuin from ${url}"
+curl -fsSL "$url" -o "$tmp/atuin.tar.gz"
+tar -xzf "$tmp/atuin.tar.gz" -C "$tmp"
+
+mkdir -p "$HOME/.local/bin"
+install -m 0755 "$(find "$tmp" -type f -name atuin | head -1)" "$HOME/.local/bin/atuin"
+echo "atuin installed to $HOME/.local/bin/atuin"
+
+# Seed the DB from existing bash history (no-op if HISTFILE is empty/missing).
+"$HOME/.local/bin/atuin" import auto || true

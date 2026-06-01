@@ -13,6 +13,14 @@
   type = "file"
   url = "https://raw.githubusercontent.com/wezterm/wezterm/main/assets/shell-integration/wezterm.sh"
   refreshPeriod = "24h"
+
+# ble.sh — bash line editor, required for atuin's full bash integration
+# (up-arrow / Ctrl-r keybindings, autosuggestions). Pure bash, arch-independent.
+[".local/share/blesh"]
+  type = "archive"
+  url = "https://github.com/akinomyoga/ble.sh/releases/download/nightly/ble-nightly.tar.xz"
+  stripComponents = 1
+  refreshPeriod = "168h"
 {{ end -}}
 
 {{ if eq .chezmoi.os "windows" -}}

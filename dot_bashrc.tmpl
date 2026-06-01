@@ -4,6 +4,37 @@ case $- in
       *) return;;
 esac
 
+# ============================================================
+# Session output logging via script(1)
+# Durable per-session capture of ALL terminal output, so wezterm
+# scrollback can stay small (history lives in files + atuin, not the pane).
+#   Replay: scriptreplay <base>.timing <base>.log
+#   Search: strip-ansi-escapes < <base>.log | grep ...
+#   Opt out: export NO_SCRIPT_LOG=1  (before the shell starts)
+# Re-execs the shell under script; the inner shell skips this block via
+# the SHELL_SESSION_LOG guard. Non-interactive shells (agents, scp) are skipped.
+# ============================================================
+if [[ $- == *i* ]] && [ -t 0 ] && [ -t 1 ] \
+   && [ -z "${SHELL_SESSION_LOG:-}" ] && [ -z "${NO_SCRIPT_LOG:-}" ] \
+   && command -v script >/dev/null 2>&1; then
+  _slog_dir="$HOME/.local/share/shell-logs"
+  mkdir -p "$_slog_dir"
+  # rotate: drop logs older than 14 days
+  find "$_slog_dir" -type f -mtime +14 -delete 2>/dev/null
+  _slog_base="$_slog_dir/$(date +%Y%m%d-%H%M%S)-pane${WEZTERM_PANE:-na}-$$"
+  export SHELL_SESSION_LOG="$_slog_base.log"
+  exec script -q -f \
+    --log-out "$_slog_base.log" \
+    --log-timing "$_slog_base.timing" \
+    --command "$BASH -i"
+fi
+
+# ble.sh (bash line editor) — required for atuin's full bash integration.
+# Sourced with --noattach here; activated with ble-attach at the very end.
+if [ -f "$HOME/.local/share/blesh/ble.sh" ]; then
+  source "$HOME/.local/share/blesh/ble.sh" --noattach
+fi
+
 # history
 shopt -s histappend
 HISTSIZE=100000
@@ -174,5 +205,19 @@ if [ -n "${QUAKE}" ] && [ -z "${TMUX}" ]; then
   tmux new-session -A -s quake
 fi
 
+# atuin — durable, searchable shell history DB (so wezterm scrollback can stay small).
+# Local-only by default; `atuin login` enables optional sync. Integrates with ble.sh
+# for up-arrow / Ctrl-r search when ble.sh is active.
+#
+# MUST stay AFTER `fzf --bash` above: both bind Ctrl+R and the last one wins.
+# We intentionally let atuin own Ctrl+R (rich DB) while fzf keeps Ctrl+T / Alt+C.
+# To hand Ctrl+R back to fzf instead, use: atuin init bash --disable-ctrl-r
+if command -v atuin >/dev/null 2>&1; then
+  eval "$(atuin init bash)"
+fi
+
 # Aliases (after PATH is built)
 [ -f "$HOME/.alias.sh" ] && source "$HOME/.alias.sh"
+
+# Activate ble.sh (must be the last line of .bashrc)
+[[ ${BLE_VERSION-} ]] && ble-attach
