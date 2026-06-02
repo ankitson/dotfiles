@@ -33,6 +33,8 @@ fi
 # Sourced with --noattach here; activated with ble-attach at the very end.
 if [ -f "$HOME/.local/share/blesh/ble.sh" ]; then
   source "$HOME/.local/share/blesh/ble.sh" --noattach
+  # Don't print a "[ble: exit N]" line after every non-zero command.
+  bleopt exec_errexit_mark=
 fi
 
 # history
