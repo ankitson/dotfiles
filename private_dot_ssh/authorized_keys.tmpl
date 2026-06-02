@@ -1,6 +1,6 @@
 {{ if .personal -}}
 {{   if .is_agent -}}
-{{     onepasswordRead "op://Agents/agent-ssh/public key" }}
+{{     onepasswordRead "op://clankers/agent-ssh/public key" }}
 {{   else -}}
 {{     onepasswordRead "op://Private/dev/public key" }}
 {{   end -}}
