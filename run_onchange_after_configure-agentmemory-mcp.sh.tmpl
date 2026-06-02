@@ -1,0 +1,25 @@
+#!/bin/sh
+set -eu
+
+# Re-run when the shared endpoint or pinned MCP shim changes.
+{{- if .is_devbox }}
+agentmemory_url=http://agentmemory-iii-engine:3111
+{{- else }}
+agentmemory_url=http://127.0.0.1:3121
+{{- end }}
+mcp_package="@agentmemory/mcp@0.9.24"
+
+if command -v codex >/dev/null 2>&1; then
+  codex mcp remove agentmemory >/dev/null 2>&1 || true
+  codex mcp add --env "AGENTMEMORY_URL=$agentmemory_url" agentmemory -- npx -y "$mcp_package"
+  codex plugin marketplace add rohitg00/agentmemory >/dev/null 2>&1 || true
+  codex plugin add agentmemory@agentmemory >/dev/null 2>&1 || true
+fi
+
+if command -v claude >/dev/null 2>&1; then
+  claude mcp remove --scope user agentmemory >/dev/null 2>&1 || true
+  claude mcp add --scope user agentmemory -e "AGENTMEMORY_URL=$agentmemory_url" -- npx -y "$mcp_package"
+  claude plugin marketplace add --scope user rohitg00/agentmemory >/dev/null 2>&1 || true
+  claude plugin install --scope user agentmemory@agentmemory >/dev/null 2>&1 || \
+    claude plugin update agentmemory@agentmemory >/dev/null 2>&1 || true
+fi

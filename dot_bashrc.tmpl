@@ -112,6 +112,11 @@ export EDITOR=vim
 {{ end -}}
 export CLICOLOR=1
 export LS_COLORS+=':ow=01;33'
+{{- if .is_devbox }}
+export AGENTMEMORY_URL=http://agentmemory-iii-engine:3111
+{{- else }}
+export AGENTMEMORY_URL=http://127.0.0.1:3121
+{{- end }}
 
 # C++ (use clang by default if available)
 {{ if lookPath "clang" -}}

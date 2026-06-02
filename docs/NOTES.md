@@ -1,5 +1,22 @@
 # Chezmoi Dotfiles - Notes
 
+## 2026-06-01: Shared agentmemory configuration
+
+### What was done
+- Added the shared agentmemory URL as chezmoi data: host processes use
+  `http://127.0.0.1:3121`; devbox and service-agent containers use
+  `http://agentmemory-iii-engine:3111` on the Docker bridge.
+- Added MCP configuration for OpenCode and pi, plus upstream capture plugins
+  for both clients.
+- Added a `run_onchange` provisioner for stateful Codex and Claude Code MCP
+  registrations and native plugin installation.
+
+### Key Design Decisions
+- Keep stateful Codex `~/.codex/config.toml` and Claude `~/.claude.json` owned
+  by their CLIs. The chezmoi script mutates only the `agentmemory` entry.
+- Pin `@agentmemory/mcp@0.9.24` so agent container rebuilds do not silently
+  pick up an incompatible MCP shim.
+
 ## 2026-05-29: Toolbox bootstrap via canonical /projects clone
 
 ### What was done

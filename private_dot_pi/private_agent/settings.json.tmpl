@@ -14,7 +14,8 @@
   "packages": ["git:github.com/badlogic/pi-doom", "npm:pi-mcp-adapter", "npm:pi-subagents", "npm:pi-goal-x", "npm:pi-web-access"],
   "extensions": [
     "{{ .chezmoi.homeDir }}/.local/lib/node_modules/@earendil-works/pi-coding-agent/examples/extensions/tools.ts",
-    "{{ .chezmoi.homeDir }}/.local/lib/node_modules/@earendil-works/pi-coding-agent/examples/extensions/plan-mode/index.ts"
+    "{{ .chezmoi.homeDir }}/.local/lib/node_modules/@earendil-works/pi-coding-agent/examples/extensions/plan-mode/index.ts",
+    "{{ .chezmoi.homeDir }}/.pi/agent/extensions/agentmemory"
   ]{{ if stat "/mnt/host/home/ankit" }},
   "sessionDir": "/mnt/host/home/ankit/.pi/agent/sessions"{{ end }}
 }

@@ -29,6 +29,11 @@
 {{-   $personal = promptBoolOnce . "personal" "personal (1Password secrets)" -}}
 {{- end -}}
 
+{{- $agentmemoryURL := "http://127.0.0.1:3121" -}}
+{{- if $is_devbox -}}
+{{-   $agentmemoryURL = "http://agentmemory-iii-engine:3111" -}}
+{{- end -}}
+
 {{- $email := "dev@ankitson.com" -}}
 
 {{/* Auto-detect Java */}}
@@ -54,6 +59,7 @@
     osid = {{ $osID | quote }}
     javaHome = {{ $javaHome | quote }}
     cudaPath = {{ $cudaPath | quote }}
+    agentmemory_url = {{ $agentmemoryURL | quote }}
 
 [github]
     refreshPeriod = "12h"

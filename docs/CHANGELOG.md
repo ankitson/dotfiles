@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-06-01
+
+### Shared agentmemory configuration
+- Added `agentmemory_url` chezmoi data and exported `AGENTMEMORY_URL` in
+  interactive shells.
+- Added pinned agentmemory MCP entries for OpenCode and pi.
+- Vendored upstream OpenCode and pi capture integrations.
+- Added a `run_onchange` provisioner for Codex and Claude Code MCP entries and
+  native plugins without taking ownership of their stateful global config.
+
 ## 2026-05-29
 
 ### Toolbox bootstrap
