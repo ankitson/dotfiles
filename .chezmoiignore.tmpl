@@ -33,3 +33,13 @@ Documents/WindowsPowerShell/**
 .local/bin/vendor/wezterm-mux-server
 .local/bin/vendor/strip-ansi-escapes
 {{ end }}
+
+{{/* bash run_ scripts don't work on Windows and crash `chezmoi apply` there.
+     Matched by de-prefixed target name (run_/once_/before_/after_ stripped). */}}
+{{ if eq .chezmoi.os "windows" }}
+clone-toolbox.sh
+install-atuin.sh
+install-tmux-plugins.sh
+link-toolbox-bins.sh
+install-nvim-plugins.sh
+{{ end }}
