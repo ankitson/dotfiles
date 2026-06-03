@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "mcpproxy": {
+      "type": "http",
+      "url": "https://mcp.dev.ankitson.com/mcp",
+      "headers": {
+        "Authorization": {{ printf "Bearer %s" (onepasswordRead "op://clankers/mcpproxy-agents/password") | quote }}
+      }
+    }
+  }
+}

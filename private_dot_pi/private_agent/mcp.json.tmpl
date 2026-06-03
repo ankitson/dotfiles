@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "mcpproxy": {
+      "url": "https://mcp.dev.ankitson.com/mcp",
+      "auth": "bearer",
+      "bearerToken": {{ onepasswordRead "op://clankers/mcpproxy-agents/password" | quote }},
+      "lifecycle": "lazy"
+    }
+  }
+}
