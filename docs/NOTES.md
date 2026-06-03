@@ -170,3 +170,27 @@
 ### What was done
 - Added `Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1` to the chezmoi source tree.
 - Updated `.chezmoiignore.tmpl` to ignore `Documents/WindowsPowerShell/**` on non-Windows hosts.
+
+## 2026-06-03: Pi MCPProxy metadata refresh
+
+### What was done
+- Switched Pi's managed `mcpproxy` MCP server lifecycle from `lazy` to `eager`.
+
+### Why
+- MCPProxy's visible tool set changes after upstream OAuth and tool approval. Eager startup lets Pi
+  refresh the gateway metadata instead of relying on a stale `mcp-cache.json` entry.
+
+## 2026-06-03: Codex MCPProxy auth without env-var dependency
+
+### What was done
+- Switched Codex's managed `mcpproxy` MCP block from `bearer_token_env_var` to a literal
+  `Authorization` header written by the run-onchange script.
+- Removed the `codex()` shell wrapper that injected `MCPPROXY_AGENT_TOKEN`.
+- Centralized the shared MCPProxy gateway URL in `.chezmoidata.toml` as `mcpproxy_gateway_url`; Claude,
+  Pi, OpenCode, and Codex config generation now reference that value.
+
+### Why
+- Codex can be launched from contexts where shell functions are not active, so relying on
+  `MCPPROXY_AGENT_TOKEN` caused MCP startup to fail before the wrapper could help.
+- The gateway URL is a shared client contract and should not be hand-maintained across each agent
+  config template.

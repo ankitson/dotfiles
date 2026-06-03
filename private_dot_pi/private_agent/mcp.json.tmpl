@@ -1,10 +1,10 @@
 {
   "mcpServers": {
     "mcpproxy": {
-      "url": "https://mcp.dev.ankitson.com/mcp",
+      "url": {{ .mcpproxy_gateway_url | quote }},
       "auth": "bearer",
       "bearerToken": {{ onepasswordRead "op://clankers/mcpproxy-agents/password" | quote }},
-      "lifecycle": "lazy"
+      "lifecycle": "eager"
     }
   }
 }

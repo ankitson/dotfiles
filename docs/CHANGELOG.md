@@ -205,3 +205,21 @@ Now that `pi` runs *inside* the `devbox` container (rather than calling into it)
 
 ### Changed
 - `.chezmoiignore.tmpl`: Ignore `Documents/WindowsPowerShell/**` when `chezmoi.os` is not `windows`.
+
+## 2026-06-03: Pi MCPProxy metadata refresh
+
+### Changed
+- `private_dot_pi/private_agent/mcp.json.tmpl`: changed the `mcpproxy` server lifecycle from
+  `lazy` to `eager` so Pi refreshes gateway tools after upstream OAuth/approval changes.
+
+## 2026-06-03: Codex MCPProxy auth
+
+### Changed
+- `run_onchange_after_codex-mcp.sh`: writes Codex's `mcpproxy` MCP server with a literal
+  `Authorization` header instead of `bearer_token_env_var = "MCPPROXY_AGENT_TOKEN"`.
+- `dot_alias.sh.tmpl`: removed the `codex()` wrapper because Codex no longer needs a per-invocation
+  token env var.
+- `.chezmoidata.toml`: added `mcpproxy_gateway_url` as the single source for the shared MCPProxy
+  gateway URL.
+- MCP client templates for Claude, OpenCode, Pi, and Codex now render the gateway URL from
+  `mcpproxy_gateway_url` instead of duplicating the literal endpoint.

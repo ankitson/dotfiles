@@ -25,7 +25,7 @@
     // scoped downstream agent token from 1Password.
     "mcpproxy": {
       "type": "remote",
-      "url": "https://mcp.dev.ankitson.com/mcp",
+      "url": {{ .mcpproxy_gateway_url | quote }},
       "enabled": true,
       "headers": {
         "Authorization": {{ printf "Bearer %s" (onepasswordRead "op://clankers/mcpproxy-agents/password") | quote }}

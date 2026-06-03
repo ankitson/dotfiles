@@ -66,16 +66,6 @@ claudep() {
 {{ end -}}
 {{ end -}}
 
-{{ if lookPath "codex" -}}
-# Transparent mcpproxy auth: inject the gateway bearer token into every codex run
-# so the mcpproxy MCP server (bearer_token_env_var=MCPPROXY_AGENT_TOKEN) can
-# authenticate. Scoped per-invocation (never exported into the shell env).
-codex() {
-  MCPPROXY_AGENT_TOKEN="$(op read "op://clankers/mcpproxy-agents/password")" \
-    command codex "$@"
-}
-{{ end -}}
-
 {{ if .is_homeserver -}}
 # Docker compose (homeserver)
 alias dch="sudo docker compose -f /home/ankit/hroot/homeserver/docker-compose.yaml"
@@ -144,4 +134,3 @@ rgs() {
     "$@"
 }
 {{- end}}
-
