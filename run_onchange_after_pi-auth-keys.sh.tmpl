@@ -1,0 +1,39 @@
+{{ if .personal -}}
+#!/bin/sh
+set -eu
+
+auth_file="${HOME}/.pi/agent/auth.json"
+tmp_file="${auth_file}.$$"
+
+mkdir -p "${HOME}/.pi/agent"
+umask 077
+
+# Keep Pi's OAuth logins (for example openai-codex from /login) while refreshing
+# the API-key providers that chezmoi owns from 1Password.
+managed='{
+  "opencode": {
+    "type": "api_key",
+    "key": {{ onepasswordRead "op://clankers/opencode-zen/password" | toJson }}
+  },
+  "deepseek": {
+    "type": "api_key",
+    "key": {{ onepasswordRead "op://clankers/deepseek/password" | toJson }}
+  },
+  "litellm": {
+    "type": "api_key",
+    "key": {{ onepasswordRead "op://clankers/litellm/password" | toJson }}
+  }
+}'
+
+if [ -s "$auth_file" ]; then
+  jq --argjson managed "$managed" '. * $managed' "$auth_file" > "$tmp_file"
+else
+  jq --argjson managed "$managed" -n '$managed' > "$tmp_file"
+fi
+
+chmod 600 "$tmp_file"
+mv "$tmp_file" "$auth_file"
+{{- else }}
+#!/bin/sh
+# No-op on machines where personal Pi secrets are not deployed.
+{{- end }}

@@ -1,5 +1,17 @@
 # Chezmoi Dotfiles - Notes
 
+## 2026-06-03: Pi OpenAI Codex provider defaults
+
+### What was done
+- Confirmed Pi already has a built-in `openai-codex` provider using the `openai-codex-responses` API and ChatGPT Plus/Pro Codex subscription OAuth.
+- Found public Pi packages that rely on the same built-in provider (`pi-codex-search`, `pi-provider-service-tier`, `end-pi-multi-pass`) rather than replacing it with a separate provider plugin.
+- Switched Pi's default provider/model to `openai-codex` / `gpt-5.5`.
+- Replaced the fully managed `~/.pi/agent/auth.json` template with a small `jq` merge script that injects managed API keys while preserving OAuth entries such as `openai-codex`.
+
+### Next steps
+- In Pi, run `/login openai-codex` once and choose `ChatGPT Plus/Pro (Codex Subscription)` if prompted.
+- Future `chezmoi apply` runs should preserve that OAuth entry while refreshing managed API keys from 1Password.
+
 ## 2026-05-29: Toolbox bootstrap via canonical /projects clone
 
 ### What was done

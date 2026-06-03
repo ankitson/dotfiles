@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-06-03
+
+### Pi OpenAI Codex provider
+- Changed Pi's default provider/model to the built-in `openai-codex` provider with `gpt-5.5`.
+- Replaced the managed `private_dot_pi/private_agent/auth.json.tmpl` file with `run_onchange_after_pi-auth-keys.sh.tmpl`, which uses `jq` to merge 1Password-managed API keys into `~/.pi/agent/auth.json` without overwriting OAuth credentials from `/login openai-codex`.
+- Documented in `models.json.tmpl` that Codex subscription models come from Pi's built-in `openai-codex` provider.
+
 ## 2026-05-29
 
 ### Toolbox bootstrap

@@ -1,5 +1,7 @@
 {{/*
-  Provider/model registration. The `litellm` provider is now registered
+  Provider/model registration. Pi's built-in `openai-codex` provider supplies
+  the ChatGPT Plus/Pro Codex subscription models after `/login openai-codex`.
+  The `litellm` provider is now registered
   dynamically by the `litellm-live-models.ts` extension (it fetches
   /v1/models at startup); the `opencode` provider is similarly registered
   by `opencode-live-models.ts`. Nothing else is hardcoded here — pi's
