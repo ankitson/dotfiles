@@ -33,3 +33,6 @@ site-packages/
 .rustup/
 .cargo/*
 !.cargo/config
+
+# Claude
+**/.claude/settings.local.json
