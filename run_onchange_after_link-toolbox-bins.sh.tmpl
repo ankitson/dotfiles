@@ -1,0 +1,32 @@
+{{- $toolboxBinFingerprint := output "python3" "-c" "import os, pathlib\nsrc = pathlib.Path.home() / 'toolbox' / 'bin'\nif src.is_dir():\n    rows = []\n    for path in sorted(src.iterdir(), key=lambda p: p.name):\n        try:\n            st = path.stat()\n        except OSError:\n            continue\n        if path.name == '.gitkeep' or not path.is_file() or not os.access(path, os.X_OK):\n            continue\n        rows.append(f'{path.name}\\t{st.st_mode & 0o777:o}\\t{st.st_size}\\t{int(st.st_mtime)}')\n    print('\\n'.join(rows))" | trim -}}
+#!/usr/bin/env bash
+# Symlink every executable regular file in ~/toolbox/bin into ~/.local/bin/.
+#
+# `run_onchange_after_` re-runs whenever this rendered script changes. The
+# template fingerprint below tracks executable regular files in toolbox/bin, so
+# adding or removing bins causes a normal `chezmoi apply` to refresh links.
+# toolbox-bin-fingerprint:
+{{- if $toolboxBinFingerprint }}
+{{- range $line := splitList "\n" $toolboxBinFingerprint }}
+# {{ $line }}
+{{- end }}
+{{- else }}
+# empty
+{{- end }}
+set -euo pipefail
+
+src="$HOME/toolbox/bin"
+dst="$HOME/.local/bin"
+
+[ -d "$src" ] || { echo "toolbox/bin not present at $src; skipping"; exit 0; }
+mkdir -p "$dst"
+
+for f in "$src"/*; do
+  [ -e "$f" ] || continue       # empty glob
+  [ -f "$f" ] || continue       # only regular files
+  [ -x "$f" ] || continue       # only executables
+  name=$(basename "$f")
+  [ "$name" = ".gitkeep" ] && continue
+  ln -sfn "$f" "$dst/$name"
+  echo "linked $dst/$name -> $f"
+done

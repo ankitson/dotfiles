@@ -240,3 +240,9 @@ Now that `pi` runs *inside* the `devbox` container (rather than calling into it)
   gateway URL.
 - MCP client templates for Claude, OpenCode, Pi, and Codex now render the gateway URL from
   `mcpproxy_gateway_url` instead of duplicating the literal endpoint.
+
+## 2026-06-03: Toolbox bin linker
+
+### Changed
+- `run_once_after_link-toolbox-bins.sh` -> `run_onchange_after_link-toolbox-bins.sh.tmpl`: the rendered script now includes a fingerprint of executable regular files in `~/toolbox/bin`, so `chezmoi apply` refreshes links when the bin set changes.
+- The linker now requires each candidate to be a regular file before checking executability, preventing executable directories from being symlinked into `~/.local/bin`.

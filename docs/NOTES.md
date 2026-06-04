@@ -206,3 +206,14 @@
   `MCPPROXY_AGENT_TOKEN` caused MCP startup to fail before the wrapper could help.
 - The gateway URL is a shared client contract and should not be hand-maintained across each agent
   config template.
+
+## 2026-06-03: Toolbox bin link refresh
+
+### What was done
+- Converted the toolbox bin linker from `run_once_after_` to a templated `run_onchange_after_` script.
+- Added a rendered fingerprint of executable regular files in `~/toolbox/bin` so `chezmoi apply` reruns the link step when bins are added, removed, or changed.
+- Added a regular-file guard before linking so executable directories such as `tests/` are skipped.
+
+### Why
+- `run_once_after_` skipped the linker once the same script content had already run on a machine, leaving newly added toolbox bins unpublished until a manual script run or forced apply.
+- Directories can have the execute bit, so the previous `[ -x "$f" ]` check was not enough to avoid linking subdirectories.
