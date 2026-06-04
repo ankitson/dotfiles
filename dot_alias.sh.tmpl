@@ -46,7 +46,7 @@ alias psudo='sudo env "PATH=$PATH" '
 
 {{ if .personal -}}
 {{ if not .is_agent -}}
-# 1Password helper (needed by claudep in interactive mode)
+# 1Password interactive helper (provides op_exec_interactive for safe secret injection)
 [ -f "$HOME/.op_helper.sh" ] && source "$HOME/.op_helper.sh"
 {{ end -}}
 
@@ -57,11 +57,9 @@ claudep() {
     claude --allow-dangerously-skip-permissions "$@"
 }
 {{ else -}}
-# Interactive mode: use op_exec_interactive for safe secret injection + cleanup
+# Interactive mode: use the regular Claude Code login (no token injection)
 claudep() {
-  op_exec_interactive \
-    CLAUDE_CODE_OAUTH_TOKEN=op://Private/Anthropic/claude-code-setup-token \
-    -- claude --allow-dangerously-skip-permissions "$@"
+  claude --allow-dangerously-skip-permissions "$@"
 }
 {{ end -}}
 {{ end -}}
