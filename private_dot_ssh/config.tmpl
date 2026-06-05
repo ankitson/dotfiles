@@ -11,49 +11,29 @@ Host github.com
 {{ if .internal_network -}}
 Host git.home.ankitson.com
   Port 1024
-
 {{ end -}}
-# Default to Tailscale MagicDNS so names work on/off the home LAN.
-# Tailscale does direct peer-to-peer over the LAN when both ends are local,
-# so there's no speed penalty at home. The *-lan aliases are break-glass for
-# when Tailscale is down/logged out.
 
-# Linux desktop (Tailscale device: desktop-linux)
 Host desktop desktop-linux
-  HostName desktop-linux.myth-dab.ts.net
-  User ankit
-
-Host desktop-lan
   HostName 172.16.0.208
   User ankit
 
-# devbox (runs on the desktop-linux host, port 2201)
 Host devbox
-  HostName desktop-linux.myth-dab.ts.net
-  Port 2201
-  User ankit
-
-Host devbox-lan
   HostName 172.16.0.208
   Port 2201
   User ankit
 
-# Windows desktop (Tailscale device: desktop-win)
-Host desktop-win
-  HostName desktop-win.myth-dab.ts.net
-  User ankit
-
-Host desktop-win-lan
-  HostName 172.16.0.200
-  User ankit
-
-# Synology NAS - LAN only, not on Tailscale
 Host synology
   HostName 192.168.1.15
   User ankit
-
-# Hetzner homelab - Tailscale only
-Host ts-hetzner-homelab hetzner
-  HostName ts-hetzner-homelab.myth-dab.ts.net
-  Port 2201
-  User ankit
+{{/* Tailscale hosts — generated from the shared inventory in
+     .chezmoidata/tailscale.yaml (devices with an `ssh:` block). Primary alias
+     is ts-<name>; connects over MagicDNS (<name>.<tailnet>). */ -}}
+{{- range .tailscale.devices }}{{ if hasKey . "ssh" }}{{ $ssh := .ssh }}
+{{- $alias := .name }}{{ if not (hasPrefix "ts-" .name) }}{{ $alias = printf "ts-%s" .name }}{{ end }}
+Host {{ $alias }}{{ range (dig "aliases" (list) $ssh) }} {{ . }}{{ end }}
+  HostName {{ .name }}.{{ $.tailscale.tailnet }}
+  User {{ dig "user" "ankit" $ssh }}
+{{- $port := dig "port" "" $ssh }}{{ if $port }}
+  Port {{ $port }}
+{{- end }}
+{{ end }}{{ end -}}

@@ -7,6 +7,16 @@
 - Replaced the managed `private_dot_pi/private_agent/auth.json.tmpl` file with `run_onchange_after_pi-auth-keys.sh.tmpl`, which uses `jq` to merge 1Password-managed API keys into `~/.pi/agent/auth.json` without overwriting OAuth credentials from `/login openai-codex`.
 - Documented in `models.json.tmpl` that Codex subscription models come from Pi's built-in `openai-codex` provider.
 
+## 2026-05-31: Enable + harden macOS sshd (Tailscale-only remote login)
+
+Adds declarative setup so this MacBook accepts SSH, but only from trusted source addresses — driven by a shared Tailscale device inventory that the whole repo can read.
+
+- `.chezmoidata/tailscale.yaml`: **new shared metadata** loaded into the chezmoi template data root (`.tailscale`). Lists the tailnet domain and my own Tailscale devices with their stable per-node IPv4+IPv6 and two flags: `trusted` (may SSH *into* this Mac → sshd allowlist) and an optional `ssh:` block (this Mac can SSH *to* it → a `~/.ssh/config` Host is generated, with optional `user`/`port`/`aliases`). Single source of truth for both consumers below. Third-party devices deliberately omitted.
+- `.chezmoitemplates/sshd_config_tailscale_secure.conf`: the hardened drop-in (kept as a template partial so chezmoi doesn't deploy it into `$HOME`). Pubkey-only auth (`AuthenticationMethods publickey`, no password/root/empty), reduced forwarding/X11/tunnel surface, idle reaping. Source-address allowlist via a negated `Match Address "*,!…"` + `DenyUsers *`: every login is refused unless allowed. Rather than the whole Tailscale CGNAT range (`100.64.0.0/10`, which would also admit other devices sharing the tailnet), it **pins the IPs of devices flagged `trusted`** in the inventory, plus home LAN (`172.16.0.0/16`, `172.21.0.0/16`) and loopback (`127.0.0.1`, `::1`). The `Match` rule and the doc-comment table are both generated from `.tailscale`.
+- `private_dot_ssh/config.tmpl`: the two hand-written `ts-*` Host blocks are replaced by a loop over `.tailscale.devices` (those with an `ssh:` block), connecting over MagicDNS (`<name>.<tailnet>`). Primary alias is `ts-<name>` (e.g. `ts-desktop-linux`, `ts-desktop-win`); the old `ts-desktop` alias is preserved via `aliases`. Note `ts-hetzner-homelab` is an outbound target (`ssh:` set) but `trusted: false`, so it's *not* in the inbound allowlist.
+- `run_onchange_after_configure-macos-sshd.sh.tmpl`: enables Remote Login (`systemsetup -f -setremotelogin on`) and installs the drop-in to `/etc/ssh/sshd_config.d/010-tailscale-secure.conf` (sorts before macOS's stock `100-macos.conf`, so its first-value-wins hardening takes precedence). `sudo`-gated; validates with `sshd -t` and rolls back on failure so a bad config can't lock you out. Renders empty on non-darwin (chezmoi skips it).
+- Verified with `sshd -T -C addr=…`: external IPs (8.8.8.8, 192.168.1.50) and excluded devices (hetzner, third-party) → `DenyUsers *`; trusted Tailscale devices / 172.x / 127.0.0.1 fall through to the pubkey-only baseline. macOS launches sshd per-connection via launchd, so the config is re-read on each connect — no daemon reload needed.
+
 ## 2026-05-29
 
 ### Toolbox bootstrap
