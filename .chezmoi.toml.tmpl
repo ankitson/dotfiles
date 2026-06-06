@@ -58,6 +58,13 @@
 [github]
     refreshPeriod = "12h"
 
+{{/* chezmoi's built-in interpreters don't include node, but several scripts
+     (e.g. run_onchange_after_claude-desktop-mcp.js) need it on Windows where
+     the kernel won't honor a "#!/usr/bin/env node" shebang. Map it here so
+     `chezmoi apply` can execute *.js scripts on every platform. */ -}}
+[interpreters.js]
+    command = "node"
+
 {{ if $is_agent -}}
 [onepassword]
     mode = "service"

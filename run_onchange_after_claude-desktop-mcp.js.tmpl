@@ -1,0 +1,55 @@
+#!/usr/bin/env node
+// Declaratively register the mcpproxy gateway as a Claude Desktop MCP server.
+// claude_desktop_config.json holds account-scoped preferences and runtime state,
+// so it is NOT chezmoi-managed wholesale. Instead we upsert just the
+// mcpServers.mcpproxy block (and prune the legacy "mymcp" entry).
+// Re-runs whenever this script's contents change (run_onchange).
+//
+// Written in Node.js (rather than the bash+python pattern used by codex-mcp)
+// because python3 is not installed on Windows hosts, while node is required
+// anyway for npx mcp-remote — which is how the entry below invokes the
+// gateway, since Claude Desktop only speaks stdio MCP transport.
+
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+const { execFileSync } = require("child_process");
+
+const GATEWAY_URL = {{ .mcpproxy_gateway_url | quote }};
+
+function configPath() {
+  if (process.platform === "darwin") {
+    return path.join(os.homedir(), "Library", "Application Support", "Claude", "claude_desktop_config.json");
+  }
+  if (process.platform === "win32") {
+    const appdata = process.env.APPDATA;
+    if (!appdata) return null;
+    return path.join(appdata, "Claude", "claude_desktop_config.json");
+  }
+  return null;
+}
+
+const cfg = configPath();
+if (!cfg) process.exit(0);
+if (!fs.existsSync(path.dirname(cfg))) process.exit(0);
+
+let token;
+try {
+  token = execFileSync("op", ["read", "op://clankers/mcpproxy-agents/password"], { encoding: "utf8" }).trim();
+} catch {
+  process.exit(0);
+}
+
+const data = fs.existsSync(cfg) ? JSON.parse(fs.readFileSync(cfg, "utf8")) : {};
+data.mcpServers = data.mcpServers || {};
+delete data.mcpServers.mymcp;
+// Claude Desktop only supports stdio transport, so wrap the HTTP gateway with
+// mcp-remote. The bearer token is held in env so it is not duplicated verbatim
+// inside the args array.
+data.mcpServers.mcpproxy = {
+  command: "npx",
+  args: ["mcp-remote", GATEWAY_URL, "--header", "Authorization:${AUTH_HEADER}"],
+  env: { AUTH_HEADER: `Bearer ${token}` },
+};
+
+fs.writeFileSync(cfg, JSON.stringify(data, null, 2) + "\n");

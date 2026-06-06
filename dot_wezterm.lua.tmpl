@@ -21,6 +21,7 @@ config.default_prog = { "/bin/bash", "-l" }
 -- ------------------------------------------------------------
 -- Quake-style initial window placement
 -- ------------------------------------------------------------
+config.window_background_opacity = 0.85
 wezterm.on('gui-startup', function(cmd)
   local screen = wezterm.gui.screens().active
   local width = screen.width
