@@ -43,6 +43,14 @@
 {{-   $cudaPath = "/usr/local/cuda" -}}
 {{- end -}}
 
+{{/* This machine keeps its chezmoi source as a submodule under the devdocker
+     repo rather than the default ~/.local/share/chezmoi. Emit sourceDir so that
+     `chezmoi init` regenerating this config doesn't reset to the default path.
+     Guarded by stat so it's a no-op on machines without that checkout. */ -}}
+{{ if stat "/projects/devdocker/dotfiles" -}}
+sourceDir = "/projects/devdocker/dotfiles"
+
+{{ end -}}
 [data]
     email = {{ $email | quote }}
     hostname = {{ $hostname | quote }}
