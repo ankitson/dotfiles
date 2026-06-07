@@ -246,3 +246,8 @@ Now that `pi` runs *inside* the `devbox` container (rather than calling into it)
 ### Changed
 - `run_once_after_link-toolbox-bins.sh` -> `run_onchange_after_link-toolbox-bins.sh.tmpl`: the rendered script now includes a fingerprint of executable regular files in `~/toolbox/bin`, so `chezmoi apply` refreshes links when the bin set changes.
 - The linker now requires each candidate to be a regular file before checking executability, preventing executable directories from being symlinked into `~/.local/bin`.
+
+## 2026-06-07: OpenCode YOLO agent
+
+### Added
+- `private_dot_opencode/agents/yolo.md`: global OpenCode markdown agent rendered to `~/.opencode/agents/yolo.md`.

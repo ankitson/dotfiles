@@ -217,3 +217,12 @@
 ### Why
 - `run_once_after_` skipped the linker once the same script content had already run on a machine, leaving newly added toolbox bins unpublished until a manual script run or forced apply.
 - Directories can have the execute bit, so the previous `[ -x "$f" ]` check was not enough to avoid linking subdirectories.
+
+## 2026-06-07: Global OpenCode YOLO agent
+
+### What was done
+- Added a chezmoi-managed OpenCode agent at `private_dot_opencode/agents/yolo.md`, rendered to `~/.opencode/agents/yolo.md`.
+
+### Key Decisions
+- Keep OpenCode MCP servers and plugins in the existing global `~/.config/opencode/opencode.jsonc` config.
+- Define the YOLO agent as a markdown agent under `~/.opencode/agents/` so it is available from all projects.
