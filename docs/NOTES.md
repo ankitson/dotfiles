@@ -227,7 +227,6 @@
 - Keep OpenCode MCP servers and plugins in the existing global `~/.config/opencode/opencode.jsonc` config.
 - Define the YOLO agent as a markdown agent under `~/.opencode/agents/` so it is available from all projects.
 
-
 ## 2026-06-11: Global justfile and docs recipes
 
 ### What was done
@@ -241,3 +240,21 @@
 - Store webby's Cloudflare account id as regular chezmoi data; keep only the API token as a runtime 1Password reference.
 - Derive `docs-deploy`'s base name from the current directory, e.g. `/projects/job-search` passes `jobsearch-docs`; webby's `--tmp` mode publishes it as `tmp-jobsearch-docs`.
 - Use toolbox's `docme` command for Markdown site generation. Keep webby deployment in the justfile, where `docs-deploy` builds to a temporary output directory and deletes it after `webby add`.
+
+## 2026-06-14: Merged just recipe view
+
+### What was done
+- Replaced the global-only `just` alias with a Bash wrapper that can see both the nearest local justfile and `~/justfile`.
+- Clear pre-existing `just`/`j` aliases before defining the wrapper so `source ~/.alias.sh` does not alias-expand the `just()` function declaration in already-open shells.
+- `just`, `just --list`, and `just -l` now print local recipes first and global recipes second when a local justfile exists.
+- `just <recipe>` runs the local recipe when present; otherwise it falls back to `command just -g <recipe>`.
+
+### Key Decisions
+- Keep this as shell behavior rather than trying to force `just -g` to merge files; installed `just` has a global mode but no built-in merged local/global list.
+- Explicitly ignore `~/justfile` when detecting a local justfile so global recipes still run with `just -g` semantics from arbitrary directories.
+
+### Verification
+- Rendered `~/.alias.sh` with chezmoi and tested the wrapper in a scratch directory containing a local `justfile`.
+- Confirmed merged listing, local recipe dispatch, and global fallback for `docs-build --dry-run`.
+- Confirmed re-sourcing `~/.alias.sh` works when old `just`/`j` aliases are already defined.
+- Applied `~/.alias.sh` with chezmoi and confirmed `just --list` still shows the global list from a directory without a local justfile.

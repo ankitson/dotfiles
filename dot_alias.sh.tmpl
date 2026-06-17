@@ -100,8 +100,103 @@ rsync_mv() {
 alias rsmv='rsync_mv'
 
 {{- if lookPath "just" }}
-alias just="command just -g"
-alias j="command just -g"
+unalias just j 2>/dev/null || true
+
+__just_local_file() {
+  local dir="$PWD"
+  local global="$HOME/justfile"
+
+  while [ "$dir" != "/" ]; do
+    for candidate in "$dir/justfile" "$dir/Justfile" "$dir/.justfile"; do
+      if [ -f "$candidate" ] && [ "$candidate" != "$global" ]; then
+        printf '%s\n' "$candidate"
+        return 0
+      fi
+    done
+
+    [ "$dir" = "$HOME" ] && break
+    dir="$(dirname "$dir")"
+  done
+
+  return 1
+}
+
+__just_recipe_arg() {
+  local skip_next=0
+  for arg in "$@"; do
+    if [ "$skip_next" -gt 0 ]; then
+      skip_next=$((skip_next - 1))
+      continue
+    fi
+
+    case "$arg" in
+      --set)
+        skip_next=2
+        ;;
+      --*)
+        ;;
+      -*)
+        ;;
+      *=*)
+        ;;
+      *)
+        printf '%s\n' "$arg"
+        return 0
+        ;;
+    esac
+  done
+
+  return 1
+}
+
+__just_local_has_recipe() {
+  local recipe="$1"
+  local summary
+  summary="$(command just --summary 2>/dev/null)" || return 1
+  case " $summary " in
+    *" $recipe "*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+__just_list_merged() {
+  local local_file
+  local_file="$(__just_local_file 2>/dev/null || true)"
+
+  if [ -n "$local_file" ]; then
+    printf 'Local recipes (%s):\n' "$local_file"
+    command just --list --list-heading ''
+    printf '\nGlobal recipes (%s):\n' "$HOME/justfile"
+    command just -g --list --list-heading ''
+  else
+    command just -g --list
+  fi
+}
+
+just() {
+  case "${1:-}" in
+    ""|-l|--list)
+      __just_list_merged
+      return
+      ;;
+    -g|--global-justfile)
+      command just "$@"
+      return
+      ;;
+  esac
+
+  local local_file
+  local recipe
+  local_file="$(__just_local_file 2>/dev/null || true)"
+  recipe="$(__just_recipe_arg "$@" 2>/dev/null || true)"
+  if [ -n "$local_file" ] && [ -n "$recipe" ] && __just_local_has_recipe "$recipe"; then
+    command just "$@"
+  else
+    command just -g "$@"
+  fi
+}
+
+alias j='just'
 {{- end }}
 
 repo_to_text() {

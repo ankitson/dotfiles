@@ -252,7 +252,6 @@ Now that `pi` runs *inside* the `devbox` container (rather than calling into it)
 ### Added
 - `private_dot_opencode/agents/yolo.md`: global OpenCode markdown agent rendered to `~/.opencode/agents/yolo.md`.
 
-
 ## 2026-06-11: Global justfile
 
 ### Added
@@ -263,3 +262,11 @@ Now that `pi` runs *inside* the `devbox` container (rather than calling into it)
 ### Changed
 - `dot_alias.sh.tmpl`: `just` and `j` now invoke `command just -g`, making the global justfile the default from any directory without alias recursion.
 - `justfile`: docs recipes now delegate Markdown site generation to toolbox's `docme`; `docs-deploy` handles the temporary output directory and webby publish step.
+
+## 2026-06-14: Merged just listing wrapper
+
+### Changed
+- `dot_alias.sh.tmpl`: replaced the `just='command just -g'` alias with a shell function.
+- `dot_alias.sh.tmpl`: clears stale `just`/`j` aliases before defining the wrapper so re-sourcing `~/.alias.sh` works in existing shells.
+- `just`/`j` now show local and global recipes together for `just`, `just --list`, and `just -l` when a local justfile exists.
+- Recipe execution now prefers a matching local recipe and falls back to the global justfile for global-only recipes such as `docs-build`, `docs-serve`, and `docs-deploy`.
