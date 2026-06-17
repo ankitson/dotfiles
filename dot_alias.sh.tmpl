@@ -100,14 +100,8 @@ rsync_mv() {
 alias rsmv='rsync_mv'
 
 {{- if lookPath "just" }}
-just_choose() {
-  if [ "$#" -eq 0 ]; then
-    just --choose
-  else
-    just "$@"
-  fi
-}
-alias j='just_choose'
+alias just="command just -g"
+alias j="command just -g"
 {{- end }}
 
 repo_to_text() {

@@ -226,3 +226,18 @@
 ### Key Decisions
 - Keep OpenCode MCP servers and plugins in the existing global `~/.config/opencode/opencode.jsonc` config.
 - Define the YOLO agent as a markdown agent under `~/.opencode/agents/` so it is available from all projects.
+
+
+## 2026-06-11: Global justfile and docs recipes
+
+### What was done
+- Added a chezmoi-managed `~/justfile` with `docs-build`, `docs-serve`, and `docs-deploy` recipes based on `/projects/job-search`.
+- Updated shell aliases so both `just` and `j` run the global justfile by default.
+- Added a managed `~/.config/webby/config.json` so `internal` and `public` bags are available to every `webby` invocation.
+
+### Key Decisions
+- Use `command just -g` in aliases to avoid bash recursively expanding `j` into duplicate `-g` flags.
+- Keep webby bag configuration in webby's config file instead of shell aliases, so non-interactive tools like just see the same context.
+- Store webby's Cloudflare account id as regular chezmoi data; keep only the API token as a runtime 1Password reference.
+- Derive `docs-deploy`'s base name from the current directory, e.g. `/projects/job-search` passes `jobsearch-docs`; webby's `--tmp` mode publishes it as `tmp-jobsearch-docs`.
+- Use toolbox's `docme` command for Markdown site generation. Keep webby deployment in the justfile, where `docs-deploy` builds to a temporary output directory and deletes it after `webby add`.

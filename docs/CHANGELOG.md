@@ -251,3 +251,15 @@ Now that `pi` runs *inside* the `devbox` container (rather than calling into it)
 
 ### Added
 - `private_dot_opencode/agents/yolo.md`: global OpenCode markdown agent rendered to `~/.opencode/agents/yolo.md`.
+
+
+## 2026-06-11: Global justfile
+
+### Added
+- `justfile`: chezmoi-managed global justfile rendered to `~/justfile`, with global docs build, serve, and deploy recipes.
+- `private_dot_config/webby/config.json.tmpl`: managed webby config defining the `internal` Caddy bag and `public` Cloudflare Pages bag.
+- `.chezmoidata.toml`: `webby_cloudflare_account_id` for webby's Cloudflare Pages config.
+
+### Changed
+- `dot_alias.sh.tmpl`: `just` and `j` now invoke `command just -g`, making the global justfile the default from any directory without alias recursion.
+- `justfile`: docs recipes now delegate Markdown site generation to toolbox's `docme`; `docs-deploy` handles the temporary output directory and webby publish step.
