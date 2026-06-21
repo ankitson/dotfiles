@@ -1,3 +1,14 @@
+# PATH for non-interactive agent shells.
+{{- $nonInteractivePaths := list -}}
+{{- range (list "/projects/toolbox/bin") -}}
+{{-   if stat . -}}
+{{-     $nonInteractivePaths = mustAppend $nonInteractivePaths . -}}
+{{-   end -}}
+{{- end }}
+{{ if $nonInteractivePaths -}}
+export PATH={{ toStrings $nonInteractivePaths | join ":" }}:$PATH
+{{ end -}}
+
 # If not running interactively, don't do anything
 case $- in
     *i*) ;;
