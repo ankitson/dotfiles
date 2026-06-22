@@ -73,7 +73,10 @@ sourceDir = "/projects/devdocker/dotfiles"
 [interpreters.js]
     command = "node"
 
-{{ if $is_agent -}}
+{{/* Use 1Password service-account mode wherever a service token is present
+     (agents, plus hosts that source ~/.config/op/service-account.env). Interactive
+     machines without the token fall back to the default account mode. */ -}}
+{{ if or $is_agent (env "OP_SERVICE_ACCOUNT_TOKEN") -}}
 [onepassword]
     mode = "service"
 {{ end -}}

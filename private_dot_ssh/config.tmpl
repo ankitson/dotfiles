@@ -25,13 +25,15 @@ Host devbox
 Host synology
   HostName 192.168.1.15
   User ankit
-{{/* Tailscale hosts — generated from the shared inventory in
-     .chezmoidata/tailscale.yaml (devices with an `ssh:` block). Primary alias
-     is ts-<name>; connects over MagicDNS (<name>.<tailnet>). */ -}}
-{{- range .tailscale.devices }}{{ if hasKey . "ssh" }}{{ $ssh := .ssh }}
+{{/* Tailscale hosts — generated from the shared inventory in 1Password
+     (op://clankers/tailscale-inventory), devices with an `ssh:` block. Primary
+     alias is ts-<name>; connects over MagicDNS (<name>.<tailnet>). Requires op
+     auth at apply time (host has OP_SERVICE_ACCOUNT_TOKEN). */ -}}
+{{- $ts := (onepasswordRead "op://clankers/tailscale-inventory/notesPlain" | fromYaml).tailscale -}}
+{{- range $ts.devices }}{{ if hasKey . "ssh" }}{{ $ssh := .ssh }}
 {{- $alias := .name }}{{ if not (hasPrefix "ts-" .name) }}{{ $alias = printf "ts-%s" .name }}{{ end }}
 Host {{ $alias }}{{ range (dig "aliases" (list) $ssh) }} {{ . }}{{ end }}
-  HostName {{ .name }}.{{ $.tailscale.tailnet }}
+  HostName {{ .name }}.{{ $ts.tailnet }}
   User {{ dig "user" "ankit" $ssh }}
 {{- $port := dig "port" "" $ssh }}{{ if $port }}
   Port {{ $port }}
