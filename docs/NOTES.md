@@ -258,3 +258,13 @@
 - Confirmed merged listing, local recipe dispatch, and global fallback for `docs-build --dry-run`.
 - Confirmed re-sourcing `~/.alias.sh` works when old `just`/`j` aliases are already defined.
 - Applied `~/.alias.sh` with chezmoi and confirmed `just --list` still shows the global list from a directory without a local justfile.
+
+## 2026-06-22: Tailscale inventory source moved to 1Password
+
+### What was done
+- Confirmed the `clankers/tailscale-inventory` Secure Note exposes its YAML body as `op://clankers/tailscale-inventory/notesPlain`.
+- Switched the SSH client config template and macOS sshd allowlist partial to parse that note with `onepasswordRead | fromYaml`.
+- Removed `.chezmoidata/tailscale.yaml` so the device list is not duplicated in the dotfiles repo.
+
+### Next steps
+- Edit the `tailscale-inventory` Secure Note when devices, trusted flags, aliases, or SSH ports change, then run `chezmoi apply --refresh-externals --force` on personal machines.

@@ -36,6 +36,8 @@ On personal machines (`personal = true`), these require 1Password:
 
 - `~/.ssh/id_rsa` and `~/.ssh/id_rsa.pub` — deployed at apply time via `onepasswordRead`
 - `~/.ssh/authorized_keys` — public key from 1Password
+- `~/.ssh/config` Tailscale Host entries — generated from `op://clankers/tailscale-inventory/notesPlain`
+- macOS sshd Tailscale allowlist — generated from the same `tailscale-inventory` note on personal Darwin machines
 - `BORG_PASSCOMMAND` — reads passphrase at runtime via `op read`
 - `claudep` function — injects token at runtime via `op_exec_interactive`
 

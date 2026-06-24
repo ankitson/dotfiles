@@ -270,3 +270,13 @@ Now that `pi` runs *inside* the `devbox` container (rather than calling into it)
 - `dot_alias.sh.tmpl`: clears stale `just`/`j` aliases before defining the wrapper so re-sourcing `~/.alias.sh` works in existing shells.
 - `just`/`j` now show local and global recipes together for `just`, `just --list`, and `just -l` when a local justfile exists.
 - Recipe execution now prefers a matching local recipe and falls back to the global justfile for global-only recipes such as `docs-build`, `docs-serve`, and `docs-deploy`.
+
+## 2026-06-22: Tailscale inventory from 1Password
+
+### Changed
+- `private_dot_ssh/config.tmpl`: reads `op://clankers/tailscale-inventory/notesPlain`, parses it as YAML, and generates Tailscale SSH Host entries from devices with an `ssh:` block.
+- `.chezmoitemplates/sshd_config_tailscale_secure.conf`: reads the same 1Password inventory for trusted-device IPs in the macOS sshd allowlist.
+- `run_onchange_after_configure-macos-sshd.sh.tmpl`: runs only on personal Darwin machines because rendering the allowlist now requires 1Password access.
+
+### Removed
+- `.chezmoidata/tailscale.yaml`: removed the committed Tailscale device list so 1Password is the single source of truth.

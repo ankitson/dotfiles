@@ -1,4 +1,4 @@
-{{ if eq .chezmoi.os "darwin" -}}
+{{ if and (eq .chezmoi.os "darwin") .personal -}}
 #!/usr/bin/env bash
 # Managed by chezmoi. Enables macOS Remote Login (sshd) and installs a hardened,
 # Tailscale-only sshd drop-in. `run_onchange` re-runs this whenever the script or
