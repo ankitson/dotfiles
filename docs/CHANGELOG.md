@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-06-26
+
+### Machine config: collapse boolean flags into `identity` + `host` enums
+- `.chezmoi.toml.tmpl`: replaced `personal` + `is_agent` with `identity` (`none` | `personal` | `agent`), and `is_devbox` + `is_homeserver` with `host` (`generic` | `devbox` | `homeserver`). One source of truth per axis; no more `personal = true` for agents.
+- Rewrote every callsite: `.personal` → `ne .identity "none"`, `.is_agent` → `eq .identity "agent"`, `.is_devbox`/`.is_homeserver` → `eq .host "..."`. Flattened the gate+fork nesting in the SSH key templates and `claudep` into `if/else if` chains.
+- `internal_network`: deprecated, not deleted. Kept the declaration as a tombstone comment (Tailscale now reaches internal hosts from anywhere), stopped assigning it, dropped it from `[data]`. The toolbox clone always uses `https://github.com/...` (git `insteadOf` rewrites it to ssh on secret machines); `Host git.home.ankitson.com / Port 1024` is now unconditional.
+
+### Tailscale inventory: YAML → TOML, explicit hostnames, IP lists, LAN IPs
+- Renamed the 1Password note `tailscale-inventory` → `device-inventory` (it carries LAN IPs and non-Tailscale entries now), migrated YAML → TOML, and flattened the root `[tailscale]` table to top-level `tailnet` + `[[devices]]`.
+- Schema is now dumb/explicit: every device carries an explicit `hostname` (no `<name>.<tailnet>` derivation) and `ts_ips` / `lan_ips` lists (replacing scalar `ipv4`/`ipv6`).
+- Added `devbox` (→ `desktop-linux.<tailnet>:2201`; no `trusted`/IPs, so it never enters the allowlists). Dropped the `synology` and bare `desktop`/`desktop-linux` hardcoded Host blocks — no device IPs remain in git.
+- `private_dot_ssh/private_config.tmpl`: `fromYaml` → `fromToml`; renderer emits `Host <name>` / `HostName <hostname>` (dropped the `ts-` prefix and `aliases`).
+- `.chezmoitemplates/sshd_config_tailscale_secure.conf`: `fromYaml` → `fromToml`; the source-address allowlist now includes each trusted device's `lan_ips` alongside `ts_ips`, so a trusted device isn't locked out over the LAN if Tailscale is down. `trusted` lookups are fail-closed via `dig`.
+- `homeserver:bin/render-caddy-allowlist.py`: switched to stdlib `tomllib` (dropped the `pyyaml` dep); reads `ts_ips` only — Caddy stays tailnet-only and deliberately does NOT trust `lan_ips`.
+
 ## 2026-06-03
 
 ### Pi OpenAI Codex provider

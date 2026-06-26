@@ -1,5 +1,30 @@
 # Chezmoi Dotfiles - Notes
 
+## 2026-06-26: Config flag cleanup + Tailscale inventory to TOML
+
+### Goal
+Clean up the accreted boolean feature flags in `.chezmoi.toml.tmpl` and finish moving the device inventory fully into 1Password.
+
+### Decisions
+- Two boolean pairs were really enums in disguise: `personal`/`is_agent` → `identity` (`none`/`personal`/`agent`), and `is_devbox`/`is_homeserver` → `host` (`generic`/`devbox`/`homeserver`). `none` is the third state the original `personal=false` covered. Callsites read bare `.identity`/`.host` and crash on a missing key by design — forces an explicit value after `chezmoi init` rather than silently defaulting.
+- `internal_network` deprecated, not deleted: kept as a documented tombstone because Tailscale now reaches internal hosts from anywhere, so there's no LAN-only path left to gate.
+- Inventory stays in 1Password (not a chezmoi data file): it must stay out of git for privacy, and three consumers across two repos read it (ssh client config, macOS sshd allowlist, homeserver Caddy `trusted` allowlist) — only 1Password is reachable by all three.
+- Inventory schema made dumb/explicit per request: explicit `hostname` per device, IPs as `ts_ips`/`lan_ips` lists rather than scalar `ipv4`/`ipv6`.
+- sshd allowlist trusts `lan_ips` (anti-lockout if Tailscale is down); Caddy stays tailnet-only and does NOT, matching the earlier hardening that removed off-Tailscale ingress.
+
+### Discovery
+- The hardcoded `desktop`/`devbox`/`synology` Host blocks were the last device IPs left in git. Only `desktop-linux` was already in the inventory; `devbox` is the homeserver reached on ssh port 2201 (`desktop-linux.<tailnet>:2201`); `synology` was dropped per request.
+- chezmoi's op integration requires the config's `onepassword.mode` to match the environment (service token vs interactive session). Rendering templates that call `onepasswordRead` only works when the generated config's mode and the shell env agree — relevant when testing on a host that has `OP_SERVICE_ACCOUNT_TOKEN` set.
+
+### Verification
+- Validated the Caddy allowlist output is byte-identical before/after both vault rewrites (ts-only IP set unchanged).
+- Confirmed the sshd allowlist gains `172.16.0.208` (desktop-linux LAN) and that all three consumers parse the TOML.
+- Rendered both `identity = personal` and `identity = agent` branches: correct git identity, `claudep`, AGENTS.env section, and SSH vault per mode.
+
+### Next steps
+- Add `lan_ips` for any other devices that should keep LAN reachability — only `desktop-linux` is populated.
+- Reconcile a leftover: the agent `claudep` still reads `op://Agents/claude-code/credential` while everything else (ssh keys, inventory) uses the `clankers` vault.
+
 ## 2026-06-03: Pi OpenAI Codex provider defaults
 
 ### What was done

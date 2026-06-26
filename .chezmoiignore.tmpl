@@ -3,7 +3,7 @@ LICENSE
 docs/
 logs/
 
-{{ if not .personal }}
+{{ if eq .identity "none" }}
 .ssh
 .ssh/**
 .pi

@@ -1,9 +1,7 @@
-{{/* boolean feature tags */}}
-{{- $personal := false -}}{{/* true if this machine should have secrets from 1Password */}}
-{{- $is_devbox := false -}}
-{{- $is_homeserver := false -}}
-{{- $is_agent := false -}}{{/* true if running as an automated agent (service account) */}}
-{{- $internal_network := false -}}{{/* true if on home LAN with access to git.home.ankitson.com */}}
+{{/* machine feature tags */}}
+{{- $identity := "none" -}}{{/* none | personal | agent. none = no secrets; personal & agent both deploy 1Password secrets, from op://Private (as Ankit) vs op://clankers (as the agent) */}}
+{{- $host := "generic" -}}{{/* generic | devbox | homeserver — which machine environment this is */}}
+{{- $internal_network := false -}}{{/* DEPRECATED: no longer read. Tailscale reaches internal hosts from anywhere now, so there's no LAN-only path left to gate. */}}
 {{- "" -}}
 
 {{- $osID := .chezmoi.os -}}
@@ -14,19 +12,18 @@
 {{- $hostname := .chezmoi.hostname -}}
 
 {{- if env "OP_SERVICE_ACCOUNT_TOKEN" -}}
-{{-   $is_agent = true -}}
-{{-   $personal = true -}}{{/* agents still need secrets deployed */}}
-{{-   $is_devbox = true -}}
+{{-   $identity = "agent" -}}
+{{-   $host = "devbox" -}}
 {{- else if eq $hostname "desktop-linux" -}}
-{{-   $personal = true -}}
-{{-   $is_homeserver = true -}}
-{{-   $internal_network = true -}}
+{{-   $identity = "personal" -}}
+{{-   $host = "homeserver" -}}
 {{- else if eq $hostname "devbox" -}}
-{{-   $personal = true -}}
-{{-   $is_devbox = true -}}
-{{-   $internal_network = true -}}
+{{-   $identity = "personal" -}}
+{{-   $host = "devbox" -}}
 {{- else if stdinIsATTY -}}
-{{-   $personal = promptBoolOnce . "personal" "personal (1Password secrets)" -}}
+{{-   if promptBoolOnce . "personal" "personal (1Password secrets)" -}}
+{{-     $identity = "personal" -}}
+{{-   end -}}
 {{- end -}}
 
 {{- $email := "dev@ankitson.com" -}}
@@ -54,11 +51,8 @@ sourceDir = "/projects/devdocker/dotfiles"
 [data]
     email = {{ $email | quote }}
     hostname = {{ $hostname | quote }}
-    personal = {{ $personal }}
-    is_devbox = {{ $is_devbox }}
-    is_homeserver = {{ $is_homeserver }}
-    is_agent = {{ $is_agent }}
-    internal_network = {{ $internal_network }}
+    identity = {{ $identity | quote }}
+    host = {{ $host | quote }}
     osid = {{ $osID | quote }}
     javaHome = {{ $javaHome | quote }}
     cudaPath = {{ $cudaPath | quote }}
@@ -73,7 +67,7 @@ sourceDir = "/projects/devdocker/dotfiles"
 [interpreters.js]
     command = "node"
 
-{{ if $is_agent -}}
+{{ if eq $identity "agent" -}}
 [onepassword]
     mode = "service"
 {{ end -}}

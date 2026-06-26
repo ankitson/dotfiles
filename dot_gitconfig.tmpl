@@ -1,5 +1,5 @@
 [user]
-{{ if .is_agent -}}
+{{ if eq .identity "agent" -}}
   email = agent@ankitson.com
   name = Devbox Agent
 {{ else -}}
@@ -47,7 +47,7 @@
   smudge = git-lfs smudge -- %f
   process = git-lfs filter-process
   required = true
-{{ if or .personal .is_agent -}}
+{{ if ne .identity "none" -}}
 [url "git@github.com:ankitson/"]
   insteadOf = https://github.com/ankitson/
 {{ end -}}

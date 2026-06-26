@@ -170,7 +170,7 @@ export JAVA_HOME={{ .javaHome | quote }}
 {{-   $paths = mustAppend $paths (printf "%s/bin" .javaHome) -}}
 {{- end -}}
 {{- /* Homeserver-specific */ -}}
-{{- if .is_homeserver -}}
+{{- if eq .host "homeserver" -}}
 {{-   if stat "/home/ankit/hroot/homeserver/bin" -}}
 {{-     $paths = mustAppend $paths "/home/ankit/hroot/homeserver/bin" -}}
 {{-   end -}}

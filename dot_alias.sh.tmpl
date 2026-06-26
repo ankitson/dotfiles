@@ -44,27 +44,23 @@ alias nobuf="stdbuf -o0 "
 
 alias psudo='sudo env "PATH=$PATH" '
 
-{{ if .personal -}}
-{{ if not .is_agent -}}
+{{ if eq .identity "personal" -}}
 # 1Password interactive helper (provides op_exec_interactive for safe secret injection)
 [ -f "$HOME/.op_helper.sh" ] && source "$HOME/.op_helper.sh"
-{{ end -}}
 
-{{ if .is_agent -}}
+# Interactive mode: use the regular Claude Code login (no token injection)
+claudep() {
+  claude --allow-dangerously-skip-permissions "$@"
+}
+{{ else if eq .identity "agent" -}}
 # Agent mode: service account token is already in env, op read works directly
 claudep() {
   CLAUDE_CODE_OAUTH_TOKEN="$(op read "op://Agents/claude-code/credential")" \
     claude --allow-dangerously-skip-permissions "$@"
 }
-{{ else -}}
-# Interactive mode: use the regular Claude Code login (no token injection)
-claudep() {
-  claude --allow-dangerously-skip-permissions "$@"
-}
-{{ end -}}
 {{ end -}}
 
-{{ if .is_homeserver -}}
+{{ if eq .host "homeserver" -}}
 # Docker compose (homeserver)
 alias dch="sudo docker compose -f /home/ankit/hroot/homeserver/docker-compose.yaml"
 dc_log_short() {

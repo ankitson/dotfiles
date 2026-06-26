@@ -1,7 +1,5 @@
-{{- if .personal -}}
-{{-   if .is_agent -}}
-{{-     onepasswordRead "op://clankers/agent-ssh/private key?ssh-format=openssh" -}}
-{{-   else -}}
-{{-     onepasswordRead "op://Private/dev/private key" -}}
-{{-   end -}}
+{{- if eq .identity "personal" -}}
+{{-   onepasswordRead "op://Private/dev/private key" -}}
+{{- else if eq .identity "agent" -}}
+{{-   onepasswordRead "op://clankers/agent-ssh/private key?ssh-format=openssh" -}}
 {{- end -}}
