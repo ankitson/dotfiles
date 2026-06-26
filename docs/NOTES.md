@@ -23,9 +23,13 @@ Clean up the accreted boolean feature flags in `.chezmoi.toml.tmpl` and finish m
 - Confirmed the sshd allowlist gains `172.16.0.208` (desktop-linux LAN) and that all three consumers parse the TOML.
 - Rendered both `identity = personal` and `identity = agent` branches: correct git identity, `claudep`, AGENTS.env section, and SSH vault per mode.
 
+#### Resolved
+- Agent `claudep` now reads `op://clankers/anthropic-claude-code-setup-token/password` (was the stale `op://Agents/claude-code/credential` — the `Agents` vault no longer exists). Audited every `op://` reference across dotfiles + homeserver; all others resolve.
+
 #### Next steps
 - Add `lan_ips` for any other devices that should keep LAN reachability — only `desktop-linux` is populated.
-- Reconcile a leftover: the agent `claudep` still reads `op://Agents/claude-code/credential` while everything else (ssh keys, inventory) uses the `clankers` vault.
+- `op://clankers/allplace/password` in `homeserver/bin/couchdb-init.sh:89` is an informational echo pointing at a non-existent item (candidates: `obsidian-allplace` / `allplace-redacted`). Not a functional read, and the right item is ambiguous — left for you to reconcile.
+- The `OP_SERVICE_ACCOUNT_TOKEN` ergonomics (a global export hijacks personal `op` and trips agent-detection) — inject on demand instead of exporting globally.
 
 ## 2026-06-22
 

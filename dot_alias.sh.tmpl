@@ -55,7 +55,7 @@ claudep() {
 {{ else if eq .identity "agent" -}}
 # Agent mode: service account token is already in env, op read works directly
 claudep() {
-  CLAUDE_CODE_OAUTH_TOKEN="$(op read "op://Agents/claude-code/credential")" \
+  CLAUDE_CODE_OAUTH_TOKEN="$(op read "op://clankers/anthropic-claude-code-setup-token/password")" \
     claude --allow-dangerously-skip-permissions "$@"
 }
 {{ end -}}

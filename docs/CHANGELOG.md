@@ -15,6 +15,9 @@
 - `.chezmoitemplates/sshd_config_tailscale_secure.conf`: `fromYaml` → `fromToml`; the source-address allowlist now includes each trusted device's `lan_ips` alongside `ts_ips`, so a trusted device isn't locked out over the LAN if Tailscale is down. `trusted` lookups are fail-closed via `dig`.
 - `homeserver:bin/render-caddy-allowlist.py`: switched to stdlib `tomllib` (dropped the `pyyaml` dep); reads `ts_ips` only — Caddy stays tailnet-only and deliberately does NOT trust `lan_ips`.
 
+### Fix agent claudep token vault
+- `dot_alias.sh.tmpl`: agent `claudep` now reads `op://clankers/anthropic-claude-code-setup-token/password` instead of the stale `op://Agents/claude-code/credential` (the `Agents` vault no longer exists). Audited every `op://` reference across both repos; all others resolve.
+
 ## 2026-06-22
 
 ### Tailscale inventory from 1Password
