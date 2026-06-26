@@ -3,6 +3,27 @@ LICENSE
 docs/
 logs/
 
+{{/* Mirror ~/.gitignore_global so chezmoi never manages the junk git already
+     ignores — chezmoi does not read .gitignore on its own. Single source of
+     truth. NOTE: chezmoi ignore matching is NOT gitignore-compatible for depth:
+     a slash-free pattern (e.g. one for .pyc files) matches only at the home
+     root, so it is also emitted with a leading globstar to match at any depth.
+     Anchored patterns (those containing a slash) and negations pass through. */}}
+{{- $out := list -}}
+{{- range (include "dot_gitignore_global" | splitList "\n") -}}
+{{-   $p := trim . -}}
+{{-   if or (eq $p "") (hasPrefix "#" $p) -}}
+{{-   else if hasPrefix "!" $p -}}
+{{-     $out = append $out $p -}}
+{{-   else if contains "/" (trimSuffix "/" $p) -}}
+{{-     $out = append $out $p -}}
+{{-   else -}}
+{{-     $out = append $out $p -}}
+{{-     $out = append $out (printf "**/%s" $p) -}}
+{{-   end -}}
+{{- end -}}
+{{ $out | join "\n" }}
+
 {{ if eq .identity "none" }}
 .ssh
 .ssh/**
