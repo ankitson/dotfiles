@@ -1,3 +1,18 @@
+#!/usr/bin/env python3
+"""chezmoi modify_ script for ~/.claude/settings.json.
+
+chezmoi pipes the current target file in on stdin and uses our stdout as the
+new contents. We enforce the settings this repo owns and preserve keys that
+Claude Code writes itself (e.g. enabledPlugins, tui), so the file stops
+fighting between hand-managed config and tool-written config.
+"""
+import json
+import sys
+
+HOME = {{ .chezmoi.homeDir | quote }}
+
+# Keys this repo owns. Claude Code owns everything else it adds to the file.
+MANAGED = json.loads(r"""
 {
   "model": "opus",
   "cleanupPeriodDays": 99999,
@@ -33,7 +48,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "bash {{ .chezmoi.homeDir }}/.claude/statusline-command.sh"
+    "command": "__STATUSLINE_COMMAND__"
   },
   "theme": "dark",
   "voice": {
@@ -58,3 +73,21 @@
     ]
   }
 }
+""")
+MANAGED["statusLine"]["command"] = f"bash {HOME}/.claude/statusline-command.sh"
+
+
+def deep_merge(base, overlay):
+    out = dict(base)
+    for key, value in overlay.items():
+        if isinstance(value, dict) and isinstance(out.get(key), dict):
+            out[key] = deep_merge(out[key], value)
+        else:
+            out[key] = value
+    return out
+
+
+raw = sys.stdin.read()
+existing = json.loads(raw) if raw.strip() else {}
+merged = deep_merge(existing, MANAGED)
+print(json.dumps(merged, indent=2))

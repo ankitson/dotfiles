@@ -1,0 +1,53 @@
+#!/usr/bin/env python3
+"""chezmoi modify_ script for ~/.pi/agent/settings.json.
+
+Pi writes runtime state such as lastChangelogVersion, and users may change the
+default model locally. Preserve those values while enforcing the repo-owned
+provider, package, extension, and devbox session settings.
+"""
+import json
+import sys
+
+HOME = {{ .chezmoi.homeDir | quote }}
+
+DEFAULTS = {
+    "lastChangelogVersion": "0.78.0",
+    "defaultModel": "gpt-5.4-mini",
+}
+
+MANAGED = {
+    "defaultProvider": "openai-codex",
+    "defaultThinkingLevel": "high",
+    "packages": [
+        "git:github.com/badlogic/pi-doom",
+        "npm:pi-mcp-adapter",
+        "npm:pi-subagents",
+        "npm:pi-goal-x",
+        "npm:pi-web-access",
+    ],
+    "extensions": [
+        f"{HOME}/.local/lib/node_modules/@earendil-works/pi-coding-agent/examples/extensions/tools.ts",
+        f"{HOME}/.local/lib/node_modules/@earendil-works/pi-coding-agent/examples/extensions/plan-mode/index.ts",
+    ],
+}
+
+{{- if stat "/mnt/host/home/ankit" }}
+MANAGED["sessionDir"] = "/mnt/host/home/ankit/.pi/agent/sessions"
+{{- end }}
+
+
+def deep_merge(base, overlay):
+    out = dict(base)
+    for key, value in overlay.items():
+        if isinstance(value, dict) and isinstance(out.get(key), dict):
+            out[key] = deep_merge(out[key], value)
+        else:
+            out[key] = value
+    return out
+
+
+raw = sys.stdin.read()
+existing = json.loads(raw) if raw.strip() else {}
+base = existing if existing else DEFAULTS
+merged = deep_merge(base, MANAGED)
+sys.stdout.write(json.dumps(merged, indent=2))

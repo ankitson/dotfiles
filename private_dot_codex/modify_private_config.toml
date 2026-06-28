@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+"""chezmoi modify_ script for ~/.codex/config.toml.
+
+The Codex app/mobile remote-control path starts a plain app-server on the host;
+it does not inherit shell aliases such as `codexp` or the `yolow` profile. Keep
+the base config in full-access mode so app-controlled local threads do not fall
+back to permission prompts, while preserving Codex-owned runtime state and
+secrets in the live file.
+"""
+import re
+import sys
+import tomllib
+
+ROOT_SETTINGS = {
+    "approval_policy": "never",
+    "sandbox_mode": "danger-full-access",
+    "approvals_reviewer": "user",
+}
+
+TRUSTED_PROJECTS = [
+    "/home/ankit",
+    "/home/ankit/hroot",
+    "/home/ankit/hroot/projects",
+]
+
+
+def quote_string(value):
+    return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
+def fmt_value(value):
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, str):
+        return quote_string(value)
+    raise TypeError(f"unsupported TOML value: {value!r}")
+
+
+def table_header(parts):
+    return "[" + ".".join(quote_string(part) if "/" in part else part for part in parts) + "]"
+
+
+def is_header(line):
+    stripped = line.strip()
+    return stripped.startswith("[") and stripped.endswith("]")
+
+
+def set_root_key(lines, key, value):
+    replacement = f"{key} = {fmt_value(value)}"
+    first_header = next((i for i, line in enumerate(lines) if is_header(line)), len(lines))
+    pattern = re.compile(rf"^\s*{re.escape(key)}\s*=")
+
+    for index in range(first_header):
+        if pattern.match(lines[index]):
+            lines[index] = replacement
+            return
+
+    insert_at = first_header
+    if insert_at > 0 and lines[insert_at - 1].strip() == "":
+        insert_at -= 1
+    lines.insert(insert_at, replacement)
+
+
+def set_table_key(lines, header, key, value):
+    replacement = f"{key} = {fmt_value(value)}"
+    pattern = re.compile(rf"^\s*{re.escape(key)}\s*=")
+
+    for index, line in enumerate(lines):
+        if line.strip() != header:
+            continue
+
+        end = next((i for i in range(index + 1, len(lines)) if is_header(lines[i])), len(lines))
+        for item_index in range(index + 1, end):
+            if pattern.match(lines[item_index]):
+                lines[item_index] = replacement
+                return
+
+        lines.insert(end, replacement)
+        return
+
+    if lines and lines[-1].strip() != "":
+        lines.append("")
+    lines.extend([header, replacement])
+
+
+raw = sys.stdin.read()
+lines = raw.splitlines()
+
+for key, value in ROOT_SETTINGS.items():
+    set_root_key(lines, key, value)
+
+for project in TRUSTED_PROJECTS:
+    set_table_key(lines, table_header(("projects", project)), "trust_level", "trusted")
+
+output = "\n".join(lines).rstrip() + "\n"
+tomllib.loads(output)
+sys.stdout.write(output)
