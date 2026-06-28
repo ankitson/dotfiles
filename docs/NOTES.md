@@ -1,5 +1,21 @@
 # Chezmoi Dotfiles - Notes
 
+## 2026-06-27
+
+### Agent devbox identity and non-interactive PATH
+
+#### Goal
+Make the `agent-devbox` git identity and shell PATH durable through the image/dotfiles source, rather than relying on runtime `docker exec` fixes.
+
+#### Discovery
+- Agent-mode git identity is rendered by `dot_gitconfig.tmpl`.
+- `bash -lc` was sourcing `.bashrc`, but the non-interactive pre-return block only added `/projects/toolbox/bin`; the fuller path list lived below the interactive guard.
+
+#### Verification
+- Applied only `~/.bashrc` and `~/.gitconfig` from `/projects/devdocker/dotfiles` inside the running `agent-devbox`.
+- Verified `git config --global` returns `Azimuth <azimuth@agents.ankitson.com>`.
+- Verified `bash -lc` and `bash -ic` now expose the same user path additions.
+
 ## 2026-06-26
 
 ### Config flag cleanup + Tailscale inventory to TOML

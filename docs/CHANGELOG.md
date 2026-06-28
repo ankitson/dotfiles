@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-06-27
+
+### Agent devbox identity and shell PATH
+- Updated agent-mode git identity to `Azimuth <azimuth@agents.ankitson.com>`.
+- Moved the consolidated `.bashrc` PATH block before the non-interactive shell return so `bash -lc` gets the same user tool paths as interactive shells.
+- Added GitHub CLI (`gh`) to the devbox image package install list.
+
 ## 2026-06-26
 
 ### Machine config: collapse boolean flags into `identity` + `host` enums
