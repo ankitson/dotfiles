@@ -1,0 +1,22 @@
+{
+  "defaultBag": "internal",
+  "bags": {
+    "internal": {
+      "dir": "/projects/webby/bags/internal",
+      "noIndex": true,
+      "host": {
+        "type": "caddy",
+        "url": "https://home.ankitson.com/webby/"
+      }
+    },
+    "public": {
+      "dir": "/projects/blog/public/mini",
+      "indexChromeDir": "/projects/blog/site-chrome/dist",
+      "host": {
+        "type": "command",
+        "url": "https://ankitson.com/mini/",
+        "deploy": "echo '✓ mini regenerated in public/mini/ — commit & push the blog repo to publish (CF builds it)'"
+      }
+    }
+  }
+}

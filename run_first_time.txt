@@ -1,6 +1,0 @@
-#!/usr/bin/env zsh
-
-[[ -t 0 && -t 1 ]] || exit 0
-
-autoload -Uz zsh-newuser-install
-  zsh-newuser-install -f

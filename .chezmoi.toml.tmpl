@@ -48,6 +48,8 @@
 sourceDir = "/projects/devdocker/dotfiles"
 
 {{ end -}}
+umask = 0o022
+
 [data]
     email = {{ $email | quote }}
     hostname = {{ $hostname | quote }}
