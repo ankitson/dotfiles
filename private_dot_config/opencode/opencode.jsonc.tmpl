@@ -1,24 +1,81 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  // Keep OpenCode authenticated providers available on disk, but only expose
+  // the Bifrost front door in model/provider selection.
+  "enabled_providers": ["bifrost"],
+  "plugin": [
+    "file://{{ .chezmoi.homeDir }}/.config/opencode/plugins/bifrost-passthrough-headers.js",
+    "@whisperopencode/push"
+  ],
   "provider": {
-    "litellm": {
-      "name": "LiteLLM",
+    "bifrost": {
+      // Bifrost LLM gateway (devserver docker-compose `bifrost` service).
+      // OpenAI-compatible endpoint. Model ids are <provider>/<model> as Bifrost
+      // expects, e.g. openrouter/openai/gpt-oss-20b:free or anthropic/claude-haiku-4-5.
+      // No auth configured on Bifrost, so apiKey is a placeholder.
+      "name": "Bifrost",
       "npm": "@ai-sdk/openai-compatible",
       "options": {
-        "baseURL": "https://litellm.home.ankitson.com/v1",
-        "apiKey": {{ onepasswordRead "op://clankers/litellm/password" | quote }}
+        "baseURL": "http://bifrost.dev.ankitson.com/openai/v1",
+        "apiKey": "sk-bifrost-local",
+        "timeout": 300000,
+        "chunkTimeout": 300000,
+        "headers": {
+          "x-bf-passthrough-extra-params": "true"
+        }
       },
-      // Models are populated at startup by the litellm-live-models plugin
-      // (plugins/litellm-live-models.js). Add a static entry here only as a
-      // fallback for offline use.
-      "models": {}
+      "models": {
+        "openrouter/openai/gpt-oss-20b:free": { "name": "OR gpt-oss-20b (free)" },
+        "openrouter/openai/gpt-oss-120b:free": { "name": "OR gpt-oss-120b (free)" },
+        "openrouter/qwen/qwen3-coder:free": { "name": "OR qwen3-coder (free)" },
+        "openrouter/meta-llama/llama-3.3-70b-instruct:free": { "name": "OR llama-3.3-70b (free)" },
+        "anthropic/claude-haiku-4-5": { "name": "Claude Haiku 4.5 (API key)" },
+        "anthropic/claude-sonnet-4-5": { "name": "Claude Sonnet 4.5 (API key)" },
+        // Bifrost dynamic model-policy suffixes. The Bifrost plugin strips the
+        // bracket suffix and turns it into OpenRouter provider-routing fields.
+        "openrouter/deepseek/deepseek-v4-pro[zdr,provider=digitalocean]": {
+          "name": "DeepSeek v4 Pro (OR/ZDR DigitalOcean)"
+        },
+        "openrouter/deepseek/deepseek-v4-flash[zdr,provider=digitalocean]": {
+          "name": "DeepSeek v4 Flash (OR/ZDR DigitalOcean)"
+        },
+        "openrouter/deepseek/deepseek-v4-flash[json64:eyJwcm92aWRlciI6eyJvbmx5IjpbImRpZ2l0YWxvY2VhbiJdLCJhbGxvd19mYWxsYmFja3MiOmZhbHNlfX0]": {
+          "name": "DeepSeek v4 Flash (OR/json64 DigitalOcean example)"
+        },
+        "openrouter/deepseek/deepseek-v4-flash[provider=wafer]": {
+          "name": "deepseek-v4-flash @wafer (BYOK)"
+        },
+        "deepseek/deepseek-v4-flash": {
+          "name": "deepseek-v4-flash (Deepseek)"
+        },
+        // Opt-out/default OpenRouter route.
+        "openrouter/deepseek/deepseek-v4-flash": { "name": "DeepSeek v4 Flash (OR/default routing)" },
+        // NVIDIA NIM (custom Bifrost provider, build.nvidia.com free tier).
+        "nvidia/meta/llama-3.1-8b-instruct": { "name": "NIM llama-3.1-8b" },
+        "nvidia/nvidia/nvidia-nemotron-nano-9b-v2": { "name": "NIM nemotron-nano-9b" },
+        // Local Unsloth Studio on desktop-win. Studio's OpenAI-compatible API
+        // treats the requested model as informational and uses the active loaded model.
+        "unsloth/default": {
+          "name": "Unsloth Studio (local active model)",
+          "limit": {
+            "context": 131072,
+            "output": 8192
+          }
+        },
+        // DeepSeek + Mistral via OpenRouter (auto-uses BYOK once those keys are registered).
+        "openrouter/deepseek/deepseek-chat-v3.1": { "name": "DeepSeek v3.1 (OR/BYOK)" },
+        "openrouter/deepseek/deepseek-v4-pro": { "name": "DeepSeek v4 Pro (OR/BYOK)" },
+        "openrouter/mistralai/mistral-small-2603": { "name": "Mistral Small (OR/BYOK)" },
+        "codex/gpt-5.5": { "name": "GPT 5.5 (Codex)" },
+        "codex/gpt-5.4": { "name": "GPT 5.4 (Codex)" }
+      }
     }
   },
-  "model": "litellm/claude-sonnet-4-5",
-  "small_model": "litellm/deepseek-chat",
-  "plugin": [
-    "./plugins/litellm-live-models.js"
-  ],
+  "model": "bifrost/openrouter/deepseek/deepseek-v4-pro[zdr,provider=digitalocean]",
+  "small_model": "bifrost/openrouter/deepseek/deepseek-v4-pro[zdr,provider=digitalocean]",
+  "permission": {
+    "*": "allow"
+  },
   "mcp": {
     // Single gateway: all MCP upstreams (fastmail, exa, ...) are federated by
     // mcpproxy. Clients never talk to upstreams directly. Bearer token is the
