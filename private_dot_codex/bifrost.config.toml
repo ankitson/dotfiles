@@ -1,0 +1,18 @@
+# Opt-in Bifrost profile. Use with:
+#   codex --profile bifrost
+#
+# Bifrost is the devserver LLM gateway. Its OpenAI-compatible route is exposed
+# at /openai/v1 and owns the real upstream provider credentials.
+model = "openrouter/north-mini-code:free"
+model_provider = "bifrost"
+model_reasoning_effort = "xhigh"
+
+[model_providers.bifrost]
+name = "Bifrost"
+base_url = "http://bifrost.dev.ankitson.com/openai/v1"
+wire_api = "responses"
+experimental_bearer_token = "sk-bifrost-local"
+request_max_retries = 4
+stream_max_retries = 10
+stream_idle_timeout_ms = 300000
+http_headers = { "x-bf-passthrough-extra-params" = "true" }

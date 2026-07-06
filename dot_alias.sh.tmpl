@@ -60,6 +60,10 @@ claudep() {
 }
 {{ end -}}
 
+claudeb() {
+  claude --settings "$HOME/.claude/bifrost-settings.json" --allow-dangerously-skip-permissions "$@"
+}
+
 {{ if eq .host "homeserver" -}}
 # Docker compose (homeserver)
 alias dch="sudo docker compose -f /home/ankit/hroot/homeserver/docker-compose.yaml"
@@ -202,6 +206,7 @@ alias r2t="repo_to_text"
 
 {{- if lookPath "codex" }}
 alias codexp="codex --profile yolow"
+alias codexb="codex --profile bifrost"
 {{- end }}
 
 {{- if lookPath "rg" }}

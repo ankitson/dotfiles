@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "model": "anthropic/claude-opus-4-8",
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://bifrost.dev.ankitson.com/anthropic",
+    "ANTHROPIC_AUTH_TOKEN": "sk-bifrost-local"
+  }
+}
