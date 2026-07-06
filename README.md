@@ -27,6 +27,7 @@ dot_gitconfig.tmpl              # templated email, gh credential helper
 dot_op_helper.sh                # 1Password shell helpers
 private_dot_ssh/                # SSH keys from 1Password
 private_dot_claude/             # Claude Code settings + statusline
+private_dot_codex/              # Codex CLI profiles
 private_dot_config/nvim/        # neovim config
 ```
 
@@ -40,6 +41,13 @@ On personal machines (`personal = true`), these require 1Password:
 - macOS sshd source-address allowlist — generated from the same `device-inventory` note on personal Darwin machines
 - `BORG_PASSCOMMAND` — reads passphrase at runtime via `op read`
 - `claudep` function — injects token at runtime via `op_exec_interactive`
+
+## Agent CLI Profiles
+
+- `codexp` — Codex with the `yolow` full-access profile
+- `codexb` — Codex with the opt-in `bifrost` profile
+- `claudep` — Claude Code with permission prompts skipped
+- `claudeb` — Claude Code with `~/.claude/bifrost-settings.json`
 
 ## External Dependencies
 

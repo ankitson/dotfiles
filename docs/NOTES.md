@@ -1,6 +1,81 @@
 # Chezmoi Dotfiles - Notes
 
+## 2026-07-06
+
+### Bifrost opt-in profiles for Codex and Claude Code
+
+#### Goal
+Make Bifrost available to Codex CLI and Claude Code without changing the default provider/login path for either tool.
+
+#### Discovery
+- Codex supports opt-in profile files at `~/.codex/<name>.config.toml`, selected with `codex --profile <name>`.
+- Claude Code supports per-run settings files with `claude --settings <file>`, and gateway routing belongs in `ANTHROPIC_BASE_URL` plus a gateway credential in the settings `env` block.
+- The devserver Bifrost compose comments expose `/openai/v1` for OpenAI-compatible clients and `/anthropic` for Claude Code.
+
+#### Decision
+Add a `bifrost` Codex profile using Bifrost's `/openai/v1` route and a Claude Code `bifrost-settings.json` using Bifrost's `/anthropic` route. Keep both opt-in through `codexb` and `claudeb` shell helpers.
+
+#### Verification
+- Rendered the new managed files with `chezmoi cat`.
+- Parsed the Codex profile with `tomllib` and the Claude Code settings with `json`.
+- Confirmed `codex --profile bifrost exec --help` accepts the profile from a temporary `CODEX_HOME`.
+- Confirmed `claude --settings private_dot_claude/bifrost-settings.json --version` accepts the settings file without a validation error.
+
 ## 2026-06-27
+
+### Codex app-server full-access defaults
+
+#### Goal
+Make Codex sessions reachable from the mobile app without repeated permission prompts, matching the `codexp` full-access workflow.
+
+#### Discovery
+- `codexp` is only a shell alias for `codex --profile yolow`; the app/mobile remote-control path starts a plain host app-server and does not inherit that alias.
+- The live base `~/.codex/config.toml` still had `approval_policy = "untrusted"` and `sandbox_mode = "workspace-write"`, so app-server threads started through mobile resolved to restricted mode.
+- `codex debug app-server send-message-v2` with a `date +%s` prompt reproduced the prompt locally before the fix: `thread/start` returned `approvalPolicy: "untrusted"` / `workspaceWrite`, then requested command approval for `date +%s`.
+
+#### Decision
+Manage base `~/.codex/config.toml` with a line-preserving `modify_private_config.toml` script. It enforces `approval_policy = "never"`, `sandbox_mode = "danger-full-access"`, and trusted broad local roots while preserving Codex-owned runtime state, MCP config, hook state, and secrets.
+
+#### Verification
+- Applied only `~/.codex/config.toml` with chezmoi.
+- After the change, `codex doctor --json --summary` reports approval `Never`, unrestricted filesystem, and network enabled.
+- The same app-server debug flow now starts a thread with `approvalPolicy: "never"` and `sandbox: dangerFullAccess`; `date +%s` executes without an approval request.
+
+### Chezmoi drift noise cleanup
+
+#### Goal
+Reduce false-positive dotfile diffs without applying changes to the live home directory.
+
+#### Discovery
+- Full `chezmoi diff` still cannot complete cleanly while `OP_SERVICE_ACCOUNT_TOKEN` is set with a personal/account-mode config: OpenCode renders need `op://clankers`, while personal SSH templates need `op://Private`.
+- The live WezTerm vendor binaries were newer (`20260625-133254-06c71b67`) than the repo copies (`20260117-154428-05343b38`), so applying the repo would have downgraded them.
+- Pi's `lastChangelogVersion` is runtime state, and the live default model had drifted from the managed template. A full-file template was too blunt for that file.
+- The old YOLO markdown agent lived under `~/.opencode/agents/yolo.md`; OpenCode loaded it, but treated the YAML frontmatter as prompt text. Resolved agent metadata stayed `description: null`, `mode: all`, `model: null`.
+- Defining a separate `agent.yolo` without a model avoids pinning YOLO to a separate model, but the pre-prompt TUI agent switch resolves the unset model back to the configured global default rather than dynamically following the model currently selected under Build.
+- OpenCode's current schema supports a top-level `permission` config. Setting `permission: { "*": "allow" }` merges the final allow rule into Build itself, which keeps the current Build model selection and removes the need for a YOLO agent.
+
+#### Decision
+- Pin chezmoi's generated config to `umask = 0o022` to avoid group-writable executable-mode diffs.
+- Use a Pi `modify_` script so repo-owned settings are enforced while Pi-owned/local state survives.
+- Use top-level `permission: { "*": "allow" }` instead of a separate YOLO agent. This gives the current agent YOLO-style permissions without changing the agent/model selector state.
+
+#### Verification
+- Targeted renders for Pi settings and OpenCode config are valid and produce no content diff after the source updates.
+- An isolated OpenCode config render with top-level `permission: { "*": "allow" }` resolves Build with `model: null` and a final `* allow` rule.
+- Earlier isolated OpenCode server tests confirmed the separate-agent approach was the wrong fit: `POST /session` with `agent: yolo` alone leaves the session model unset, and the pre-prompt TUI selector recalculates that unset model from the configured default.
+- A follow-up isolated render confirmed top-level `permission: { "*": "allow" }` appends the final matching allow rule to Build while leaving Build's model unset, so runtime model selection remains independent.
+
+### Agent config modify scripts
+
+#### Goal
+Stop chezmoi from fighting with Codex and Claude Code over config files that both humans and the tools mutate.
+
+#### Decision
+Use chezmoi `modify_` scripts for `~/.codex/yolow.config.toml` and `~/.claude/settings.json`: repo-owned keys are deep-merged over the current live file, while tool-owned keys stay intact.
+
+#### Verification
+- `chezmoi source-path` resolves `~/.codex/yolow.config.toml` to `private_dot_codex/modify_private_yolow.config.toml` and `~/.claude/settings.json` to `private_dot_claude/modify_settings.json.tmpl`.
+- Targeted `chezmoi diff --no-pager` and `chezmoi apply --dry-run --verbose` for both files produce no output on this machine.
 
 ### Agent devbox identity and non-interactive PATH
 

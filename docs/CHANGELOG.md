@@ -1,6 +1,31 @@
 # Changelog
 
+## 2026-07-06
+
+### Bifrost opt-in profiles for Codex and Claude Code
+- Added `~/.codex/bifrost.config.toml` as an opt-in Codex profile pointing at Bifrost's OpenAI-compatible `/openai/v1` route.
+- Added `~/.claude/bifrost-settings.json` as an opt-in Claude Code settings file pointing at Bifrost's Anthropic-compatible `/anthropic` route.
+- Added `codexb` and `claudeb` shell helpers alongside the existing `codexp` and `claudep` flows.
+
 ## 2026-06-27
+
+### Codex app-server full-access defaults
+- Added `private_dot_codex/modify_private_config.toml` to manage base `~/.codex/config.toml` without clobbering Codex-owned runtime state, MCP config, hook state, or secrets.
+- Enforced `approval_policy = "never"` and `sandbox_mode = "danger-full-access"` in base Codex config so app-server/mobile remote-control sessions inherit the same no-prompt behavior as `codexp`.
+- Marked broad local roots (`/home/ankit`, `/home/ankit/hroot`, `/home/ankit/hroot/projects`) trusted in base config so project-local Codex layers load when app/mobile starts threads there.
+
+### Chezmoi drift noise cleanup
+- Added `umask = 0o022` to the chezmoi config template so executable targets render as `0755` instead of inheriting the shell's group-writable `0002` umask.
+- Renamed the toolbox bootstrap script from `run_before_` to `run_onchange_before_` so future diffs do not show it as an always-run script once its state is recorded.
+- Refreshed the managed WezTerm vendor binaries from the live `20260625-133254-06c71b67` build.
+- Converted Pi's `~/.pi/agent/settings.json` source to a `modify_` script so Pi-owned runtime fields like `lastChangelogVersion` and local model selection are preserved while repo-owned packages/extensions stay enforced.
+- Reconciled the OpenCode Bifrost template with live additions: absolute file plugin path, `@whisperopencode/push`, the direct DeepSeek route, and the Codex model entry.
+- Replaced the OpenCode YOLO agent with a top-level `permission: { "*": "allow" }` override, so Build keeps the user's current model selection while using YOLO-style permissions. Added `.chezmoiremove` for the stale `~/.opencode/agents/yolo.md` file.
+
+### Agent config modify scripts
+- Replaced the static managed sources for `~/.codex/yolow.config.toml` and `~/.claude/settings.json` with chezmoi `modify_` scripts. The scripts enforce repo-owned settings while preserving tool-owned runtime keys such as Codex `[projects.*]` / `[hooks.*]` state and Claude Code `enabledPlugins` / `tui`.
+- Kept `~/.codex/yolow.config.toml` private via `modify_private_` so chezmoi preserves the live file's `0600` mode and avoids permission churn.
+- Verified targeted `chezmoi diff --no-pager` and `chezmoi apply --dry-run --verbose` for both files are no-ops against this machine's current live dotfiles.
 
 ### Agent devbox identity and shell PATH
 - Updated agent-mode git identity to `Azimuth <azimuth@agents.ankitson.com>`.
@@ -8,6 +33,17 @@
 - Added GitHub CLI (`gh`) to the devbox image package install list.
 
 ## 2026-06-26
+
+### OpenCode config: LiteLLM → Bifrost gateway
+- Reconciled `private_dot_config/opencode/opencode.jsonc.tmpl` to this machine's current setup: replaced the LiteLLM provider with the Bifrost LLM gateway (`bifrost.dev.ankitson.com`), `enabled_providers: ["bifrost"]`, the full Bifrost model list (OpenRouter/NVIDIA NIM/Unsloth/etc.), and the `bifrost-passthrough-headers.js` plugin (added to `plugins/`).
+- Kept the two secret-bearing fields templated rather than copying the machine's rendered literals: mcpproxy `url` → `.mcpproxy_gateway_url`, `Authorization` → `onepasswordRead "op://clankers/mcpproxy-agents/password"`. Verified the rendered structure is byte-identical to the machine file apart from those two lines.
+
+### Remove vestigial zsh first-run script
+- Deleted `run_first_time.txt` (a `run_` script that launched zsh's `zsh-newuser-install` on every interactive apply) and its `first_time.txt` entry in the `.chezmoiignore.tmpl` Windows block. Login shell is bash and no zsh config is managed, so it only ever no-op'd (or would have run the zsh wizard on a TTY apply). Nothing referenced it.
+
+### Webby config: reconcile to the machine's current version
+- `private_dot_config/webby/config.json.tmpl` was stale (last touched 2026-06-16) vs the live file on `desktop-linux` (2026-06-23), and rendered a dangling `defaultBag: "local"` (no such bag). Replaced the source with the machine's current config: `internal` serves via Caddy at `home.ankitson.com/webby/`; `public` regenerates into the blog repo (`type: command`) for Cloudflare to build on push, rather than deploying directly via `cloudflare-pages`.
+- The new config has no template expressions, so it's now a plain `config.json` (dropped the `.tmpl`). Removed the orphaned `webby_cloudflare_account_id` from `.chezmoidata.toml` (no remaining consumers).
 
 ### Machine config: collapse boolean flags into `identity` + `host` enums
 - `.chezmoi.toml.tmpl`: replaced `personal` + `is_agent` with `identity` (`none` | `personal` | `agent`), and `is_devbox` + `is_homeserver` with `host` (`generic` | `devbox` | `homeserver`). One source of truth per axis; no more `personal = true` for agents.
