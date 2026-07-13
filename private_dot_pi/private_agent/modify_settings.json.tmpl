@@ -12,11 +12,14 @@ HOME = {{ .chezmoi.homeDir | quote }}
 
 DEFAULTS = {
     "lastChangelogVersion": "0.78.0",
-    "defaultModel": "gpt-5.4-mini",
+    # codex/* bifrost models ride the shared ChatGPT Codex OAuth session and
+    # regularly hit "usage limit reached"; deepseek/deepseek-v4-flash is a
+    # bifrost-native key with its own quota, so it's a more reliable default.
+    "defaultModel": "deepseek/deepseek-v4-flash",
 }
 
 MANAGED = {
-    "defaultProvider": "openai-codex",
+    "defaultProvider": "bifrost",
     "defaultThinkingLevel": "high",
     "packages": [
         "git:github.com/badlogic/pi-doom",

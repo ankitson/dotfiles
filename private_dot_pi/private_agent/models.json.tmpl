@@ -1,11 +1,11 @@
 {{/*
   Provider/model registration. Pi's built-in `openai-codex` provider supplies
   the ChatGPT Plus/Pro Codex subscription models after `/login openai-codex`.
-  The `litellm` provider is now registered
-  dynamically by the `litellm-live-models.ts` extension (it fetches
-  /v1/models at startup); the `opencode` provider is similarly registered
-  by `opencode-live-models.ts`. Nothing else is hardcoded here — pi's
-  bundled @earendil-works/pi-ai catalog handles anthropic/openai/google/
+  The `bifrost` provider (the default gateway — see modify_settings.json.tmpl)
+  is registered dynamically by the `bifrost-live-models.ts` extension (it
+  fetches /openai/v1/models at startup); the `opencode` provider is similarly
+  registered by `opencode-live-models.ts`. Nothing else is hardcoded here —
+  pi's bundled @earendil-works/pi-ai catalog handles anthropic/openai/google/
   deepseek defaults. Add a static entry below only when a provider needs
   config that the bundled catalog doesn't supply.
 */ -}}

@@ -1,5 +1,45 @@
 # Chezmoi Dotfiles - Notes
 
+## 2026-07-10
+
+### Route the base Codex app configuration through Bifrost
+
+#### Goal
+Make both the Codex CLI and Windows desktop app honor the Bifrost gateway while
+preserving model switching instead of pinning one model.
+
+#### Discovery
+- The Windows app launches its embedded `codex app-server` without a profile, so
+  the opt-in `bifrost.config.toml` profile is not consulted.
+- A root `openai_base_url` leaves Codex on the built-in OpenAI provider. Its
+  Responses WebSocket request uses the bare selected model, which Bifrost tries
+  to resolve as OpenAI before its REST governance rule can select `codex`.
+- Provider choice and model choice are independent in Codex. Existing threads
+  also retain the provider with which they were created.
+
+#### Decision
+- Have the line-preserving base-config modifier enforce
+  `model_provider = "bifrost"`, remove the legacy root `openai_base_url` and
+  `env_key`, and define a named Responses provider at the Bifrost `/openai/v1`
+  route.
+- Disable provider WebSockets so bare app-picker models use the Bifrost REST/SSE
+  compatibility route. Preserve the app-selected root `model` value.
+- Set `requires_openai_auth = false` and use a non-secret placeholder bearer
+  while gateway inference authentication is disabled, preventing Codex's
+  ChatGPT OAuth credential from being forwarded to Bifrost.
+
+#### Verification
+- Applied an equivalent targeted modifier to the Windows base config with a
+  timestamped backup and validated the resulting TOML.
+- Restarted the Windows app and confirmed its embedded app-server started with
+  the revised base configuration.
+- A fresh Windows Codex CLI execution returned the expected sentinel through
+  Bifrost. Resumed app threads created with the old OpenAI provider must be
+  replaced by a new thread.
+- Fresh Windows executions with both `gpt-5.4-mini` and `gpt-5.5` completed
+  through the same base provider, verifying that model switching is not pinned
+  to one slug.
+
 ## 2026-07-06
 
 ### Bifrost opt-in profiles for Codex and Claude Code

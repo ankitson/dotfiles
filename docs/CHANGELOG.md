@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-07-11
+
+### AGENTS.md fan-out: cover ~/AGENTS.md and OpenCode's XDG root
+- Added root `symlink_AGENTS.md.tmpl` (manages `~/AGENTS.md`, previously an
+  unmanaged drifted hand-copy) and
+  `private_dot_config/opencode/symlink_AGENTS.md.tmpl` (OpenCode reads global
+  rules from `~/.config/opencode/AGENTS.md`, which didn't exist) — both →
+  `~/toolbox/AGENTS.md`, matching the existing claude/codex/opencode/pi links.
+- `dot_AGENTS.env.md.tmpl`: dropped the stale `~/hroot/INDEX.md` pointer
+  (index moved to `~/hroot/allplace/wiki/INDEX.md` and is inlined into
+  AGENTS.md by `toolbox/context/build.py`); updated the header comment — the
+  file is now inlined by the toolbox render, not `@`-imported.
+
+## 2026-07-10
+
+### Route Windows Codex app and CLI through Bifrost
+
+- Updated the base Codex config modifier to select a named Bifrost Responses
+  provider without hardcoding the user's model selection.
+- Removed the legacy root OpenAI base URL/key settings and disabled Responses
+  WebSockets so Bifrost's bare-model REST routing is used consistently.
+- Updated the opt-in Bifrost profile to the same HTTPS route and provider
+  behavior.
+- Applied and validated the equivalent base-config change on Windows, restarted
+  the app, and verified a fresh CLI turn through the gateway.
+
 ## 2026-07-06
 
 ### Bifrost opt-in profiles for Codex and Claude Code

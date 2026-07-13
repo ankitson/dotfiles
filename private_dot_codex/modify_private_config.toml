@@ -15,6 +15,29 @@ ROOT_SETTINGS = {
     "approval_policy": "never",
     "sandbox_mode": "danger-full-access",
     "approvals_reviewer": "user",
+    # The desktop app launches `codex app-server` without a profile flag, so
+    # provider settings must live in the base config. Preserve the app-selected
+    # model while routing it through the named Bifrost provider.
+    "model_provider": "bifrost",
+}
+
+LEGACY_ROOT_SETTINGS = ["openai_base_url", "env_key"]
+
+BIFROST_PROVIDER_SETTINGS = {
+    "name": "Bifrost",
+    "base_url": "https://bifrost.dev.ankitson.com/openai/v1",
+    "wire_api": "responses",
+    # Bifrost inference auth is currently disabled. This non-secret placeholder
+    # prevents Codex from forwarding its ChatGPT OAuth token to the gateway.
+    # Replace with env_key=BIFROST_API_KEY when inference auth is enabled.
+    "experimental_bearer_token": "bifrost-local",
+    "requires_openai_auth": False,
+    # Bare model IDs selected by the app need Bifrost governance routing,
+    # which currently runs on the HTTP/SSE path but not before WS key selection.
+    "supports_websockets": False,
+    "request_max_retries": 4,
+    "stream_max_retries": 10,
+    "stream_idle_timeout_ms": 300000,
 }
 
 TRUSTED_PROJECTS = [
@@ -33,6 +56,8 @@ def fmt_value(value):
         return "true" if value else "false"
     if isinstance(value, str):
         return quote_string(value)
+    if isinstance(value, int):
+        return str(value)
     raise TypeError(f"unsupported TOML value: {value!r}")
 
 
@@ -59,6 +84,14 @@ def set_root_key(lines, key, value):
     if insert_at > 0 and lines[insert_at - 1].strip() == "":
         insert_at -= 1
     lines.insert(insert_at, replacement)
+
+
+def remove_root_key(lines, key):
+    first_header = next((i for i, line in enumerate(lines) if is_header(line)), len(lines))
+    pattern = re.compile(rf"^\s*{re.escape(key)}\s*=")
+    for index in range(first_header - 1, -1, -1):
+        if pattern.match(lines[index]):
+            lines.pop(index)
 
 
 def set_table_key(lines, header, key, value):
@@ -88,6 +121,12 @@ lines = raw.splitlines()
 
 for key, value in ROOT_SETTINGS.items():
     set_root_key(lines, key, value)
+
+for key in LEGACY_ROOT_SETTINGS:
+    remove_root_key(lines, key)
+
+for key, value in BIFROST_PROVIDER_SETTINGS.items():
+    set_table_key(lines, "[model_providers.bifrost]", key, value)
 
 for project in TRUSTED_PROJECTS:
     set_table_key(lines, table_header(("projects", project)), "trust_level", "trusted")

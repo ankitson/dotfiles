@@ -18,15 +18,11 @@ managed='{
   "deepseek": {
     "type": "api_key",
     "key": {{ onepasswordRead "op://clankers/deepseek/password" | toJson }}
-  },
-  "litellm": {
-    "type": "api_key",
-    "key": {{ onepasswordRead "op://clankers/litellm/password" | toJson }}
   }
 }'
 
 if [ -s "$auth_file" ]; then
-  jq --argjson managed "$managed" '. * $managed' "$auth_file" > "$tmp_file"
+  jq --argjson managed "$managed" '. * $managed | del(.litellm)' "$auth_file" > "$tmp_file"
 else
   jq --argjson managed "$managed" -n '$managed' > "$tmp_file"
 fi
