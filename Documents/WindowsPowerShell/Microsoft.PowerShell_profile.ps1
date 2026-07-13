@@ -28,3 +28,7 @@ foreach ($p in $addPaths) {
     $env:Path = "$env:Path;$p"
   }
 }
+
+function chrome-cdp-tailscale {
+  & "$HOME\.local\bin\launch-chrome-cdp-tailscale.ps1" @args
+}
