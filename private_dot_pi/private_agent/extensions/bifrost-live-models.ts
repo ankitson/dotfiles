@@ -1,6 +1,6 @@
 // bifrost-live-models.ts — async extension factory that registers the LIVE
 // Bifrost gateway catalog at startup by fetching /openai/v1/models. Bifrost
-// is the default model gateway for pi (see modify_settings.json.tmpl); this
+// is the default model gateway for pi (see modify_settings.json.py.tmpl); this
 // keeps the model list in sync with whatever Bifrost currently exposes
 // (1000+ models across providers) instead of hardcoding a static list.
 //
@@ -15,7 +15,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const BIFROST_BASE = "https://bifrost.dev.ankitson.com/openai/v1";
 const BIFROST_API_KEY = "sk-bifrost-local";
-const FETCH_TIMEOUT_MS = 8000;
+const FETCH_TIMEOUT_MS = 15000;
 const DEFAULT_CONTEXT_WINDOW = 128000;
 
 type ModelEntry = { id: string; owned_by?: string; context_window?: number };
@@ -48,16 +48,30 @@ export default async function (pi: ExtensionAPI) {
     baseUrl: BIFROST_BASE,
     apiKey: BIFROST_API_KEY,
     api: "openai-completions",
-    models: list.data.map((m) => ({
-      id: m.id,
-      name: prettifyName(m.id),
-      reasoning: looksLikeReasoning(m.id),
-      input: ["text"],
-      cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
-      contextWindow: m.context_window ?? DEFAULT_CONTEXT_WINDOW,
-      maxTokens: Math.min(m.context_window ?? DEFAULT_CONTEXT_WINDOW, 128000),
-    })),
+    models: list.data
+      .map((m) => ({
+        id: m.id,
+        name: prettifyName(m.id),
+        reasoning: looksLikeReasoning(m.id),
+        input: ["text"],
+        cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+        contextWindow: m.context_window ?? DEFAULT_CONTEXT_WINDOW,
+        maxTokens: Math.min(m.context_window ?? DEFAULT_CONTEXT_WINDOW, 128000),
+      }))
+      // Sort so LM Studio models surface first in pi's /model picker. The
+      // picker (model-selector.js) orders by provider only and preserves
+      // registration order within a provider (V8 stable sort), so this is the
+      // one lever we have. rank() returns 0 for lmstudio/*, 1 otherwise;
+      // Array.prototype.sort is stable in Node ≥12, so relative order within
+      // each group is unchanged from the gateway catalog.
+      .sort((a, b) => rank(a.id) - rank(b.id)),
   });
+}
+
+// 0 for ids that should float to the top of the picker (lmstudio/*), 1
+// otherwise. Keep this a numeric comparator so Array.sort stays stable.
+function rank(id: string): number {
+  return id.startsWith("lmstudio/") ? 0 : 1;
 }
 
 function prettifyName(id: string): string {

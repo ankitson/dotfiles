@@ -31,6 +31,19 @@ private_dot_codex/              # Codex CLI profiles
 private_dot_config/nvim/        # neovim config
 ```
 
+## Modify scripts and Windows
+
+`modify_` scripts (e.g. `modify_settings.json.py.tmpl`) target config files whose
+extension (`.json`, `.toml`) has no chezmoi interpreter, so a `.py` (and `.py.tmpl`
+for templated variants) suffix is appended to select the `python3` interpreter.
+chezmoi strips that suffix from the target name, leaving `settings.json` / `config.toml`.
+
+**Why:** on Windows chezmoi resolves script interpreters by file extension, not the
+`#!` shebang. A modify script named after its `.json`/`.toml` target has no registered
+interpreter, so chezmoi direct-exec's the temp file and fails with
+`%1 is not a valid Win32 application`. The `.py` extension maps to the `python3`
+interpreter (chezmoi default; already on PATH). Don't "fix" this by dropping the `.py`.
+
 ## 1Password Integration
 
 On personal machines (`personal = true`), these require 1Password:

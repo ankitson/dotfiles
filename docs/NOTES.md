@@ -74,7 +74,7 @@ Make Codex sessions reachable from the mobile app without repeated permission pr
 - `codex debug app-server send-message-v2` with a `date +%s` prompt reproduced the prompt locally before the fix: `thread/start` returned `approvalPolicy: "untrusted"` / `workspaceWrite`, then requested command approval for `date +%s`.
 
 #### Decision
-Manage base `~/.codex/config.toml` with a line-preserving `modify_private_config.toml` script. It enforces `approval_policy = "never"`, `sandbox_mode = "danger-full-access"`, and trusted broad local roots while preserving Codex-owned runtime state, MCP config, hook state, and secrets.
+Manage base `~/.codex/config.toml` with a line-preserving `modify_private_config.toml.py` script. It enforces `approval_policy = "never"`, `sandbox_mode = "danger-full-access"`, and trusted broad local roots while preserving Codex-owned runtime state, MCP config, hook state, and secrets.
 
 #### Verification
 - Applied only `~/.codex/config.toml` with chezmoi.
@@ -114,7 +114,7 @@ Stop chezmoi from fighting with Codex and Claude Code over config files that bot
 Use chezmoi `modify_` scripts for `~/.codex/yolow.config.toml` and `~/.claude/settings.json`: repo-owned keys are deep-merged over the current live file, while tool-owned keys stay intact.
 
 #### Verification
-- `chezmoi source-path` resolves `~/.codex/yolow.config.toml` to `private_dot_codex/modify_private_yolow.config.toml` and `~/.claude/settings.json` to `private_dot_claude/modify_settings.json.tmpl`.
+- `chezmoi source-path` resolves `~/.codex/yolow.config.toml` to `private_dot_codex/modify_private_yolow.config.toml.py` and `~/.claude/settings.json` to `private_dot_claude/modify_settings.json.py.tmpl`. The trailing `.py` (or `.py.tmpl`) extension selects the `python3` interpreter and is stripped from the target name — required on Windows, where chezmoi resolves interpreters by file extension (the `#!` shebang is ignored) and `.json`/`.toml` have no interpreter, so a bare `modify_settings.json.tmpl` would be direct-exec'd and fail with "not a valid Win32 application".
 - Targeted `chezmoi diff --no-pager` and `chezmoi apply --dry-run --verbose` for both files produce no output on this machine.
 
 ### Agent devbox identity and non-interactive PATH
