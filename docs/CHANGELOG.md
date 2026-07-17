@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-07-17
+
+### Cache-first Pi Bifrost and OpenCode model discovery
+
+- Migrated the live Bifrost and OpenCode model providers to Pi's persisted
+  `refreshModels` catalog API, so startup uses the local catalog immediately
+  and refreshes stale entries in the background.
+- Primed the cached catalogs before enabling the migration, preserving all
+  currently exposed Bifrost (1,171) and OpenCode (55) models and their
+  supported Pi metadata.
+
+### Disable Pi's duplicate browser screenshot tool
+
+- Moved `browser-tools.ts` to Pi's `extensions-available/` source directory
+  and added its old live path to `.chezmoiremove`, disabling the auto-loaded
+  `browser_screenshot` tool while preserving its source for a reversible
+  re-enable.
+
+### Disable Pi's stale devbox tools
+
+- Moved the unmanaged `devbox-tools.ts` extension to `extensions-available/`
+  and added its active path to `.chezmoiremove`, disabling the redundant
+  `devbox_code_execute` and `devbox_browser_screenshot` tools while retaining
+  their source as a backup.
+
 ## 2026-07-11
 
 ### AGENTS.md fan-out: cover ~/AGENTS.md and OpenCode's XDG root

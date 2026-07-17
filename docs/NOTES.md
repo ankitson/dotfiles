@@ -1,5 +1,63 @@
 # Chezmoi Dotfiles - Notes
 
+## 2026-07-17
+
+### Cache Pi live model catalogs before startup
+
+#### Decision
+
+- Converted the Bifrost and OpenCode model-discovery extensions from async
+  startup factories to Pi's cache-backed `refreshModels` provider API.
+- Both providers register synchronously, serve their persisted catalog
+  immediately, and refresh only stale catalogs in the background. A transient
+  endpoint failure retains the last verified catalog rather than removing the
+  provider.
+- Primed the Bifrost (1,171 models) and OpenCode (55 models) catalogs before
+  enabling the migration. Bifrost exposes IDs and optional context windows,
+  but no image/tool capability metadata; keep its existing text and
+  reasoning heuristics rather than inventing unsupported capabilities.
+
+#### Verification
+
+- Loaded each extension in an isolated Pi agent directory and confirmed its
+  cache-miss fallback provider is valid.
+- After applying the managed extensions, `pi --list-models` returned all
+  1,171 Bifrost models and all 55 OpenCode models; their cached metadata
+  matched the pre-migration catalog exactly. `pi --offline --list-models
+  bifrost` returned the same 1,171 entries.
+- Normal Pi help startup completed in about 1.3 seconds without waiting on
+  either remote model endpoint.
+
+### Retire Pi's redundant browser screenshot extension
+
+#### Decision
+
+- Moved `browser-tools.ts` from Pi's auto-loaded `extensions/` directory to
+  `extensions-available/` and added the old live path to `.chezmoiremove`.
+- `agent-browser` is the shared browser and screenshot interface; the local
+  Playwright-only `browser_screenshot` tool duplicated that capability.
+
+#### Verification
+
+- Targeted chezmoi dry-run showed only the removal of
+  `~/.pi/agent/extensions/browser-tools.ts`.
+- Applied that single removal and confirmed the live extension is absent.
+
+### Disable Pi's stale devbox tools
+
+#### Decision
+
+- Moved the unmanaged `devbox-tools.ts` extension into `extensions-available/`
+  and declared its active path for removal through chezmoi.
+- Its nested Docker command runner duplicates Pi's shell access, while its
+  screenshot helper duplicates `agent-browser` and depends on a stale
+  preplaced script.
+
+#### Verification
+
+- Confirmed the live extension was removed before adding the durable removal
+  rule for other managed hosts.
+
 ## 2026-07-10
 
 ### Route the base Codex app configuration through Bifrost
