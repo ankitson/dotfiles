@@ -1,14 +1,17 @@
 {{/*
   Provider/model registration. Pi's built-in `openai-codex` provider supplies
   the ChatGPT Plus/Pro Codex subscription models after `/login openai-codex`.
-  The `bifrost` provider (the default gateway — see modify_settings.json.py.tmpl)
+  The `bifrost` provider (the default gateway — see modify_settings.json.tmpl)
   is registered dynamically by the `bifrost-live-models.ts` extension (it
-  fetches /openai/v1/models at startup); the `opencode` provider is similarly
+  fetches the native /v1/models at startup); the `opencode` provider is similarly
   registered by `opencode-live-models.ts`. Nothing else is hardcoded here —
   pi's bundled @earendil-works/pi-ai catalog handles anthropic/openai/google/
   deepseek defaults. Add a static entry below only when a provider needs
   config that the bundled catalog doesn't supply.
 */ -}}
 {
+  // No overrides needed: bifrost-live-models.ts now reads the native
+  // /v1/models endpoint and infers reasoning + thinkingLevelMap from
+  // supported_parameters / reasoning metadata (e.g. openrouter/moonshotai/kimi-k3).
   "providers": {}
 }

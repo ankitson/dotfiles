@@ -4,14 +4,32 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const BIFROST_BASE = "https://bifrost.dev.ankitson.com/openai/v1";
+// Native bifrost list-models endpoint. Unlike the OpenAI-compat
+// /openai/v1/models (which lossily converts to the OpenAI wire format and
+// only emits id/object/owned_by/created/context_window), this returns the
+// full bifrost model: supported_parameters, architecture, pricing, etc.
+const BIFROST_MODELS_URL = "https://bifrost.dev.ankitson.com/v1/models";
 const BIFROST_API_KEY = "sk-bifrost-local";
 const FETCH_TIMEOUT_MS = 15000;
 const CACHE_TTL_MS = 4 * 60 * 60 * 1000;
 const DEFAULT_CONTEXT_WINDOW = 128000;
 const FALLBACK_MODEL_ID = "opencode-zen/deepseek-v4-flash-free";
 
-type ModelEntry = { id: string; owned_by?: string; context_window?: number };
-type ModelList = { object: "list"; data: ModelEntry[] };
+// Subset of bifrost's schemas.Model (see /v1/models). Everything optional —
+// thin providers (nanogpt, lmstudio) only return id/owned_by/created.
+type ModelEntry = {
+  id: string;
+  owned_by?: string;
+  context_length?: number;
+  context_window?: number;
+  supported_parameters?: string[];
+  architecture?: { input_modalities?: string[] };
+  reasoning?: { supported_efforts?: string[] };
+};
+type ModelList = { data: ModelEntry[] };
+
+type ThinkingLevel = "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
+type ThinkingLevelMap = Partial<Record<ThinkingLevel, string | null>>;
 
 export default function (pi: ExtensionAPI) {
   if (process.env.BIFROST_LIVE_MODELS_DISABLE) return;
@@ -60,7 +78,7 @@ async function fetchModels(signal?: AbortSignal) {
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
   try {
-    const res = await fetch(`${BIFROST_BASE}/models`, {
+    const res = await fetch(BIFROST_MODELS_URL, {
       headers: { Authorization: `Bearer ${BIFROST_API_KEY}` },
       signal: controller.signal,
     });
@@ -74,15 +92,22 @@ async function fetchModels(signal?: AbortSignal) {
 }
 
 function toModel(m: ModelEntry) {
-  const contextWindow = m.context_window ?? DEFAULT_CONTEXT_WINDOW;
+  const contextWindow = m.context_length ?? m.context_window ?? DEFAULT_CONTEXT_WINDOW;
+  const reasoning = supportsReasoning(m);
   return {
     id: m.id,
     name: prettifyName(m.id),
     provider: "bifrost",
     baseUrl: BIFROST_BASE,
     api: "openai-completions" as const,
-    reasoning: looksLikeReasoning(m.id),
-    input: ["text"] as const,
+    reasoning,
+    // Level map for effort-based models. Identity for every advertised effort
+    // — including max, which pi defaults to when thinking is enabled and which
+    // is a genuine upstream effort level. If an upstream provider rejects an
+    // advertised level, the 400 surfaces honestly instead of being silently
+    // downgraded.
+    ...(reasoning ? { thinkingLevelMap: inferThinkingLevels(m) } : {}),
+    input: supportsImages(m) ? (["text", "image"] as const) : (["text"] as const),
     cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
     contextWindow,
     maxTokens: Math.min(contextWindow, 128000),
@@ -103,12 +128,40 @@ function prettifyName(id: string): string {
     .join(" ");
 }
 
-function looksLikeReasoning(id: string): boolean {
-  // Best-effort heuristic for the thinking-style UX gate. Deliberately does
-  // NOT match a bare "deep" — that false-positives on "deepseek" (the
-  // non-reasoning deepseek-v* chat models) and causes pi to send an
-  // OpenAI-reasoning-style `developer` role message that most
-  // openai-completions passthroughs (including bifrost's deepseek route)
-  // reject with a 400.
-  return /nemotron|reasoner|reasoning|thinking|deepseek-r\d|\bo1\b|\bo3\b/i.test(id);
+function supportsReasoning(m: ModelEntry): boolean {
+  // Structured signal first: the native endpoint mirrors OpenRouter's
+  // supported_parameters ("reasoning"/"reasoning_effort") and, for some
+  // providers, a reasoning block with supported_efforts.
+  const params = m.supported_parameters ?? [];
+  if (m.reasoning || params.includes("reasoning_effort") || params.includes("reasoning")) {
+    return true;
+  }
+  // Thin providers (nanogpt, lmstudio, …) carry no capability fields, so
+  // fall back to the name heuristic. Deliberately does NOT match a bare
+  // "deep" — that false-positives on "deepseek" (the non-reasoning
+  // deepseek-v* chat models) and causes pi to send an OpenAI-reasoning-style
+  // `developer` role message that most openai-completions passthroughs
+  // (including bifrost's deepseek route) reject with a 400.
+  if (m.id.startsWith("codex/")) return true;
+  return /nemotron|reasoner|reasoning|thinking|deepseek-r\d|\bo1\b|\bo3\b/i.test(m.id);
+}
+
+// Maps pi thinking levels to upstream effort strings. Structured effort list
+// wins (null hides levels the model doesn't advertise); otherwise default to
+// the OpenAI low/medium/high convention used by openai-completions providers.
+function inferThinkingLevels(m: ModelEntry): ThinkingLevelMap {
+  const efforts = m.reasoning?.supported_efforts;
+  if (efforts && efforts.length > 0) {
+    const available = new Set(efforts);
+    const map: ThinkingLevelMap = {};
+    for (const level of ["minimal", "low", "medium", "high", "xhigh", "max"] as const) {
+      map[level] = available.has(level) ? level : null;
+    }
+    return map;
+  }
+  return { minimal: "minimal", low: "low", medium: "medium", high: "high" };
+}
+
+function supportsImages(m: ModelEntry): boolean {
+  return m.architecture?.input_modalities?.includes("image") ?? false;
 }
