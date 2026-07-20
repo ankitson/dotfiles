@@ -25,6 +25,27 @@
   `devbox_code_execute` and `devbox_browser_screenshot` tools while retaining
   their source as a backup.
 
+## 2026-07-16
+
+### Manage Omnigent CLI server default
+- Added a chezmoi `modify_` script for `~/.omnigent/config.yaml` that enforces
+  `https://omni.dev.ankitson.com` as the default server while preserving
+  Omnigent-owned host and provider state.
+
+### Fix Windows-compatible chezmoi modifier targets
+- Reverted the `.py` suffix workaround on Claude, Codex, and Pi modifier
+  scripts: this chezmoi version treated it as part of the destination filename.
+- Added explicit `python3` interpreter mappings for `.json`, `.toml`, and
+  `.yaml` modifier targets so Windows gets Python execution without creating
+  `*.json.py`, `*.toml.py`, or `*.yaml.py` targets.
+
+## 2026-07-14
+
+### Beads hub shell helper
+- Added the `bdh` Bash function to the managed shell aliases. It refreshes
+  the cross-project hub in `~/hroot/allplace/wiki` before running its requested
+  command, while preserving ordinary project-local `bd` discovery.
+
 ## 2026-07-11
 
 ### AGENTS.md fan-out: cover ~/AGENTS.md and OpenCode's XDG root

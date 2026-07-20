@@ -58,6 +58,62 @@
 - Confirmed the live extension was removed before adding the durable removal
   rule for other managed hosts.
 
+## 2026-07-16
+
+### Manage Omnigent CLI server default
+
+#### Goal
+Make Omnigent CLI commands use the homeserver automatically without requiring
+`--server` on every invocation.
+
+#### Discovery
+`~/.omnigent/config.yaml` is both Omnigent configuration and runtime state: the
+CLI writes host identity and provider entries there. A static chezmoi source
+would overwrite those tool-owned values.
+
+#### Decision
+Manage the file with a line-preserving `modify_` script. It owns only the
+root-level `server` key and preserves all other Omnigent state.
+
+#### Verification
+- Rendered the modifier against the current config and confirmed the existing
+  host/provider entries remain intact.
+- Did not apply the source change to the live home directory.
+
+### Fix Windows-compatible chezmoi modifier targets
+
+#### Discovery
+The `.py` suffix added in commit `2cd6164` was intended to select Python on
+Windows, but chezmoi 2.69.3 resolves these source names to destinations such as
+`~/.codex/config.toml.py`; the `.py` suffix is not stripped. The live `.py`
+files contain rendered config output, while the real config files are separate.
+
+#### Decision
+Restore the original modifier source names and register `python3` as the
+interpreter for `.json`, `.toml`, and `.yaml` targets in `.chezmoi.toml.tmpl`.
+This preserves the correct target path and fixes Windows interpreter selection.
+
+#### Verification
+- `chezmoi target-path --source-path` now resolves modifier sources to the real
+  config target names.
+- Rendered the new Omnigent modifier with existing host/provider YAML and
+  confirmed those entries are preserved.
+- Did not apply or remove any live destination files.
+
+## 2026-07-14
+
+### Beads hub shell helper
+
+#### Goal
+Provide an explicit command for the root-level Beads hub without changing how `bd` resolves a project-local workspace.
+
+#### Decision
+Add `bdh`, a Bash function that refreshes multi-repo hydration with `bd repo sync` before invoking `bd -C "$HOME/hroot/allplace/wiki"`. The hub belongs with the durable cross-project engineering knowledge base. An explicit `bdh repo sync` is run only once. Keep plain `bd` untouched so the nearest `.beads` workspace remains authoritative in project directories.
+
+#### Verification
+- Rendered the ChezMoi template and checked the helper with `bash -n`.
+- Confirmed `bdh status` refreshes and uses the root hub, and that project-local `bd status` still resolves independently.
+
 ## 2026-07-10
 
 ### Route the base Codex app configuration through Bifrost
