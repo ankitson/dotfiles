@@ -225,11 +225,12 @@ fi
 # We intentionally let atuin own Ctrl+R (rich DB) while fzf keeps Ctrl+T / Alt+C.
 # To hand Ctrl+R back to fzf instead, use: atuin init bash --disable-ctrl-r
 if command -v atuin >/dev/null 2>&1; then
-  eval "$(atuin init bash)"
+  eval "$(atuin init bash --disable-up-arrow)"
 fi
 
 # Aliases (after PATH is built)
 [ -f "$HOME/.alias.sh" ] && source "$HOME/.alias.sh"
 
-# Activate ble.sh (must be the last line of .bashrc)
-[[ ${BLE_VERSION-} ]] && ble-attach
+# ble.sh redraws and hooks each command. It is opt-in while diagnosing terminal
+# latency; set BASH_ENABLE_BLESH=1 before starting Bash to re-enable it.
+[[ ${BASH_ENABLE_BLESH:-0} == 1 && ${BLE_VERSION-} ]] && ble-attach
