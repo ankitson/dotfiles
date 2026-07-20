@@ -28,9 +28,9 @@
 
 {{- $email := "dev@ankitson.com" -}}
 
-{{/* Auto-detect Java */}}
+{{/* Auto-detect Java — skip on Windows (no readlink, no bash PATH match) */}}
 {{- $javaHome := "" -}}
-{{- if lookPath "java" -}}
+{{- if and (lookPath "java") (ne .chezmoi.os "windows") -}}
 {{-   $javaHome = output "bash" "-c" "readlink -f $(which java) | sed 's|/bin/java$||'" | trim -}}
 {{- end -}}
 
