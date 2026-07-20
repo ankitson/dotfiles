@@ -44,6 +44,20 @@ alias nobuf="stdbuf -o0 "
 
 alias psudo='sudo env "PATH=$PATH" '
 
+{{- if lookPath "bd" }}
+# Cross-project Beads hub. Refresh hydrated project issues before every use;
+# plain project-local `bd` remains unchanged.
+bdh() {
+  if [ "${1:-}" = "repo" ] && [ "${2:-}" = "sync" ]; then
+    command bd -C "$HOME/hroot/allplace/wiki" "$@"
+    return
+  fi
+
+  command bd -C "$HOME/hroot/allplace/wiki" repo sync || return
+  command bd -C "$HOME/hroot/allplace/wiki" "$@"
+}
+{{- end }}
+
 {{ if eq .identity "personal" -}}
 # 1Password interactive helper (provides op_exec_interactive for safe secret injection)
 [ -f "$HOME/.op_helper.sh" ] && source "$HOME/.op_helper.sh"
