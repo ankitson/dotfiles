@@ -69,6 +69,17 @@ umask = 0o022
 [interpreters.js]
     command = "node"
 
+{{/* Modifier scripts keep their target extension so chezmoi strips the
+     `modify_` attribute correctly. On Windows, map those config extensions to
+     Python instead of appending `.py`, which would become part of the target
+     filename. */}}
+[interpreters.json]
+    command = "python3"
+[interpreters.toml]
+    command = "python3"
+[interpreters.yaml]
+    command = "python3"
+
 {{ if eq $identity "agent" -}}
 [onepassword]
     mode = "service"
