@@ -2,7 +2,8 @@ import os
 import subprocess
 import argparse
 
-def extract_nv_audio(input_file):
+
+def extract_nv_audio(input_file, verbose=False):
     # Make sure the file exists before trying to process it
     if not os.path.isfile(input_file):
         print(f"Error: Could not find '{input_file}'")
@@ -12,38 +13,71 @@ def extract_nv_audio(input_file):
     base_name = os.path.splitext(input_file)[0]
     speaker_out = f"{base_name}_speaker.mp3"
     mic_out = f"{base_name}_mic.mp3"
+    mka_out = f"{base_name}.mka"
 
     # Build the ffmpeg command exactly as if typing it in the terminal
     command = [
         "ffmpeg",
-        "-i", input_file,
-        "-map", "0:a:0",
-        "-q:a", "2", speaker_out,
-        "-map", "0:a:1",
-        "-q:a", "2", mic_out,
-        "-y"  # Automatically overwrite existing files without prompting
+        "-i",
+        input_file,
+        "-map",
+        "0:a:0",
+        "-q:a",
+        "2",
+        speaker_out,
+        "-map",
+        "0:a:1",
+        "-q:a",
+        "2",
+        mic_out,
+        # Remux both tracks into a multi-track MKA container
+        "-c",
+        "copy",
+        "-map",
+        "0:a:0",
+        "-map",
+        "0:a:1",
+        mka_out,
+        "-y",  # Automatically overwrite existing files without prompting
     ]
 
     print(f"Extracting audio from '{input_file}'...")
-    
+
+    # Route ffmpeg output: suppress by default, show if verbose
+    run_kwargs = {}
+    if not verbose:
+        run_kwargs["stdout"] = subprocess.DEVNULL
+        run_kwargs["stderr"] = subprocess.DEVNULL
+
     try:
-        # Run ffmpeg. We suppress the massive wall of text ffmpeg usually outputs 
-        # to keep the terminal clean, but will catch errors if it fails.
-        subprocess.run(command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        
+        subprocess.run(command, check=True, **run_kwargs)
+
         print("Success! Created:")
         print(f"  🔊 {speaker_out}")
         print(f"  🎤 {mic_out}")
-        
+        print(f"  📦 {mka_out}  (stream 0: speaker, stream 1: mic)")
+
     except FileNotFoundError:
-        print("Error: 'ffmpeg' is not recognized. Make sure it is installed and added to your Windows PATH.")
+        print(
+            "Error: 'ffmpeg' is not recognized. Make sure it is installed and added to your Windows PATH."
+        )
     except subprocess.CalledProcessError:
-        print(f"Error: FFmpeg failed to process '{input_file}'. Ensure the file has two audio tracks.")
+        print(
+            f"Error: FFmpeg failed to process '{input_file}'. Ensure the file has two audio tracks."
+        )
+
 
 if __name__ == "__main__":
     # Set up command-line arguments so the script is easily reusable
-    parser = argparse.ArgumentParser(description="Extract NVIDIA recording audio tracks to MP3.")
+    parser = argparse.ArgumentParser(
+        description="Extract NVIDIA recording audio tracks to MP3."
+    )
     parser.add_argument("video_file", help="Path to the MP4 file")
-    
+    parser.add_argument(
+        "-v", "--verbose",
+        action="store_true",
+        help="Show ffmpeg output instead of suppressing it",
+    )
+
     args = parser.parse_args()
-    extract_nv_audio(args.video_file)
+    extract_nv_audio(args.video_file, verbose=args.verbose)
