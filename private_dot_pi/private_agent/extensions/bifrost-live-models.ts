@@ -9,6 +9,10 @@ const BIFROST_BASE = "https://bifrost.dev.ankitson.com/openai/v1";
 // only emits id/object/owned_by/created/context_window), this returns the
 // full bifrost model: supported_parameters, architecture, pricing, etc.
 const BIFROST_MODELS_URL = "https://bifrost.dev.ankitson.com/v1/models";
+// The control-plane API exposes the live routing rules. It is the source of
+// truth for virtual model names such as `email-triage/main`; those names do
+// not exist in any physical provider's /v1/models response.
+const BIFROST_ROUTING_RULES_URL = "https://bifrost.dev.ankitson.com/api/governance/routing-rules?from_memory=true";
 const BIFROST_API_KEY = "sk-bifrost-local";
 const FETCH_TIMEOUT_MS = 15000;
 const CACHE_TTL_MS = 4 * 60 * 60 * 1000;
@@ -27,6 +31,16 @@ type ModelEntry = {
   reasoning?: { supported_efforts?: string[] };
 };
 type ModelList = { data: ModelEntry[] };
+type RoutingRule = {
+  enabled?: boolean;
+  // A virtual model is enumerable only when it is explicitly named by the
+  // rule. Arbitrary CEL conditions (for example, header-based routing) do not
+  // define a model name that Pi can safely offer in its picker.
+  cel_expression?: string;
+  scope?: string;
+  targets?: Array<{ model?: string }>;
+};
+type RoutingRuleList = { rules?: RoutingRule[] };
 
 type ThinkingLevel = "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
 type ThinkingLevelMap = Partial<Record<ThinkingLevel, string | null>>;
@@ -84,11 +98,71 @@ async function fetchModels(signal?: AbortSignal) {
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const list = (await res.json()) as ModelList;
-    return list.data.map(toModel).sort((a, b) => rank(a.id) - rank(b.id));
+    const physicalModels = list.data;
+    // Rule discovery is additive. A transient control-plane failure must not
+    // hide physical models from the picker.
+    const virtualModels = await fetchVirtualModels(signal).catch(() => []);
+    return mergeVirtualModels(physicalModels, virtualModels)
+      .map(toModel)
+      .sort((a, b) => rank(a.id) - rank(b.id));
   } finally {
     clearTimeout(timer);
     signal?.removeEventListener("abort", abort);
   }
+}
+
+async function fetchVirtualModels(signal?: AbortSignal): Promise<Array<{ id: string; targetModel?: string }>> {
+  const res = await fetch(BIFROST_ROUTING_RULES_URL, {
+    headers: { Authorization: `Bearer ${BIFROST_API_KEY}` },
+    signal,
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const list = (await res.json()) as RoutingRuleList;
+  return (list.rules ?? []).flatMap(rule => advertisedModelsForRule(rule));
+}
+
+function advertisedModelsForRule(rule: RoutingRule): Array<{ id: string; targetModel?: string }> {
+  // Pi has no virtual-key or request-header context while constructing its
+  // picker. Global rules are the only rules unconditionally applicable to the
+  // local Bifrost provider. Scoped rules stay hidden rather than leaking or
+  // advertising a model that this client cannot route to.
+  if (!rule.enabled || rule.scope !== "global" || !rule.cel_expression) return [];
+
+  const ids = enumerableModelNames(rule.cel_expression);
+  if (ids.length === 0) return [];
+  const targetModel = rule.targets?.[0]?.model;
+  return ids.map(id => ({ id, targetModel }));
+}
+
+function enumerableModelNames(expression: string): string[] {
+  // Handle the two CEL forms that explicitly enumerate a model selector:
+  //   model == 'email-triage/main'
+  //   model in ['austin/main', 'emo/main']
+  // Intentionally do not try to interpret prefix, regex, header, budget, or
+  // request-type predicates: those are policies, not advertised model names.
+  const ids = new Set<string>();
+  for (const match of expression.matchAll(/\bmodel\s*==\s*(['"])([^'"]+)\1/g)) {
+    ids.add(match[2]);
+  }
+  for (const match of expression.matchAll(/\bmodel\s+in\s*\[([^\]]*)\]/g)) {
+    for (const entry of match[1].matchAll(/(['"])([^'"]+)\1/g)) ids.add(entry[2]);
+  }
+  return [...ids];
+}
+
+function mergeVirtualModels(
+  physicalModels: ModelEntry[],
+  virtualModels: Array<{ id: string; targetModel?: string }>,
+): ModelEntry[] {
+  const byID = new Map(physicalModels.map(model => [model.id, model]));
+  for (const virtual of virtualModels) {
+    if (byID.has(virtual.id)) continue;
+    // Inherit capability metadata from the rule's primary target. The model
+    // name remains the virtual selector so Bifrost evaluates the rule first.
+    const target = virtual.targetModel ? byID.get(virtual.targetModel) : undefined;
+    byID.set(virtual.id, { ...target, id: virtual.id });
+  }
+  return [...byID.values()];
 }
 
 function toModel(m: ModelEntry) {

@@ -5,9 +5,9 @@
   "enabled_providers": ["bifrost"],
   "plugin": [
     "file://{{ .chezmoi.homeDir }}/.config/opencode/plugins/bifrost-passthrough-headers.js",
-    // Temporary: moved to opencode-models-discovery plugin.
-    // "file://{{ .chezmoi.homeDir }}/.config/opencode/plugins/bifrost-live-models.js",
     "opencode-models-discovery@latest",
+    // Bifrost-aware final pass adds virtual names from live routing rules.
+    "file://{{ .chezmoi.homeDir }}/.config/opencode/plugins/bifrost-live-models.js",
     "file://{{ .chezmoi.homeDir }}/.config/opencode/plugins/bifrost-models-dev-enrichment.js",
     "@whisperopencode/push"
   ],
