@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""chezmoi modify_ script for ~/.pi/agent/settings.json.
+"""Update ~/.pi/agent/settings.json after its managed source changes.
 
 Pi writes runtime state such as lastChangelogVersion, and users may change the
 default model locally. Preserve those values while enforcing the repo-owned
 provider, package, extension, and devbox session settings.
 """
 import json
-import sys
+from pathlib import Path
 
 HOME = {{ .chezmoi.homeDir | quote }}
+SETTINGS_PATH = Path(HOME) / ".pi" / "agent" / "settings.json"
 
 DEFAULTS = {
     "lastChangelogVersion": "0.78.0",
@@ -49,8 +50,9 @@ def deep_merge(base, overlay):
     return out
 
 
-raw = sys.stdin.read()
+raw = SETTINGS_PATH.read_text(encoding="utf-8") if SETTINGS_PATH.exists() else ""
 existing = json.loads(raw) if raw.strip() else {}
 base = existing if existing else DEFAULTS
 merged = deep_merge(base, MANAGED)
-sys.stdout.write(json.dumps(merged, indent=2))
+SETTINGS_PATH.parent.mkdir(parents=True, exist_ok=True)
+SETTINGS_PATH.write_text(json.dumps(merged, indent=2) + "\n", encoding="utf-8")

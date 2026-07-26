@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""chezmoi modify_ script for ~/.codex/yolow.config.toml.
+"""Update ~/.codex/yolow.config.toml after its managed source changes.
 
 chezmoi pipes the current target file in on stdin and uses our stdout as the
 new contents. We enforce only the keys this repo owns and preserve everything
@@ -7,8 +7,10 @@ codex writes itself (e.g. [projects.*] trust levels, [hooks.*] state), so the
 file stops fighting between hand-managed config and tool-written config.
 """
 import re
-import sys
 import tomllib
+from pathlib import Path
+
+YOLOW_CONFIG_PATH = Path.home() / ".codex" / "yolow.config.toml"
 
 # Keys this repo owns. Codex owns everything else it adds to the file.
 MANAGED = {
@@ -76,7 +78,8 @@ def emit(table, prefix=()):
     return lines
 
 
-raw = sys.stdin.read()
+raw = YOLOW_CONFIG_PATH.read_text(encoding="utf-8") if YOLOW_CONFIG_PATH.exists() else ""
 existing = tomllib.loads(raw) if raw.strip() else {}
 merged = deep_merge(existing, MANAGED)
-sys.stdout.write("\n".join(emit(merged)) + "\n")
+YOLOW_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+YOLOW_CONFIG_PATH.write_text("\n".join(emit(merged)) + "\n", encoding="utf-8")

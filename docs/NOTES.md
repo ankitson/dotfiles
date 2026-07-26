@@ -26,9 +26,10 @@
 #### Decision
 
 - Remove the target-extension interpreter mappings. The existing modifier
-  scripts retain their real target names; a distinct Windows execution
-  strategy is needed if those Python modifiers must run outside Unix-like
-  environments.
+  scripts retain their real target names. Run the merge logic as root-level,
+  executable `run_onchange_after_*.py` hooks instead; the hooks use a `.py`
+  suffix for Windows interpreter selection and explicitly update their real
+  JSON, TOML, or YAML target paths.
 
 #### Verification
 

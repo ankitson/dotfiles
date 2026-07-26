@@ -12,6 +12,9 @@
 - Removed Python interpreter mappings for `.json`, `.toml`, and `.yaml`.
   Those mappings caused ChezMoi to consume target-file extensions and render
   extensionless modifier targets such as `.pi/agent/settings`.
+- Migrated the affected Python modifiers to `run_onchange_after_*.py` hooks,
+  preserving their explicit config targets while making them executable on
+  Windows.
 
 ### Standardize local secrets loading
 
