@@ -2,6 +2,11 @@
 
 ## 2026-07-26
 
+### Render Bash configuration on Windows mount points
+
+- Skip Unix PATH discovery while rendering `.bashrc` on Windows, where ChezMoi
+  safely refuses to traverse the `~/toolbox` mount point.
+
 ### Preserve ChezMoi modifier target extensions
 
 - Removed Python interpreter mappings for `.json`, `.toml`, and `.yaml`.
