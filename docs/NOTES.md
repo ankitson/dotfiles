@@ -2,6 +2,14 @@
 
 ## 2026-07-26
 
+### Preserve group-write modes
+
+#### Decision
+
+- Remove the global `umask = 0o022` override. Its executable-mode consistency
+  benefit was outweighed by repeated `664 → 644` and `775 → 755` mode-only
+  drift on machines that intentionally use a group-writable umask.
+
 ### Render Bash configuration on Windows mount points
 
 #### Discovery
