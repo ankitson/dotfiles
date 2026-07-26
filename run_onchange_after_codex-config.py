@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""chezmoi modify_ script for ~/.codex/config.toml.
+"""Update ~/.codex/config.toml after its managed source changes.
 
 The Codex app/mobile remote-control path starts a plain app-server on the host;
 it does not inherit shell aliases such as `codexp` or the `yolow` profile. Keep
@@ -8,8 +8,10 @@ back to permission prompts, while preserving Codex-owned runtime state and
 secrets in the live file.
 """
 import re
-import sys
 import tomllib
+from pathlib import Path
+
+CONFIG_PATH = Path.home() / ".codex" / "config.toml"
 
 ROOT_SETTINGS = {
     "approval_policy": "never",
@@ -116,7 +118,7 @@ def set_table_key(lines, header, key, value):
     lines.extend([header, replacement])
 
 
-raw = sys.stdin.read()
+raw = CONFIG_PATH.read_text(encoding="utf-8") if CONFIG_PATH.exists() else ""
 lines = raw.splitlines()
 
 for key, value in ROOT_SETTINGS.items():
@@ -133,4 +135,5 @@ for project in TRUSTED_PROJECTS:
 
 output = "\n".join(lines).rstrip() + "\n"
 tomllib.loads(output)
-sys.stdout.write(output)
+CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
+CONFIG_PATH.write_text(output, encoding="utf-8")
