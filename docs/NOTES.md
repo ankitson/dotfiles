@@ -2,6 +2,19 @@
 
 ## 2026-07-26
 
+### Render Bash configuration on Windows mount points
+
+#### Discovery
+
+- Windows ChezMoi refused `stat C:\Users\ankit\toolbox\bin` because the
+  path crosses an untrusted mount point, blocking every full diff and apply
+  while rendering the Unix-oriented PATH block.
+
+#### Decision
+
+- Omit that PATH discovery block on Windows. It contains Linux paths and does
+  not belong in the Windows-rendered Bash configuration.
+
 ### Preserve modifier target extensions
 
 #### Discovery

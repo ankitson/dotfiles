@@ -1,6 +1,7 @@
 # =============================
 # PATH (single consolidated block)
 # =============================
+{{- if ne .chezmoi.os "windows" }}
 {{- $homeDir := .chezmoi.homeDir -}}
 {{- $paths := list -}}
 {{- /* Home-relative paths (shared) */ -}}
@@ -41,6 +42,7 @@
 {{- end }}
 {{ if $paths -}}
 export PATH={{ toStrings $paths | join ":" }}:$PATH
+{{ end -}}
 {{ end -}}
 
 # If not running interactively, don't do anything
