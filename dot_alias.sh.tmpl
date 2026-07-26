@@ -133,6 +133,45 @@ claudeb() {
   claude --settings "$HOME/.claude/bifrost-settings.json" --allow-dangerously-skip-permissions "$@"
 }
 
+{{- if ne .identity "none" }}
+{{/* Wake-on-LAN targets come from the shared 1Password device inventory.
+     Devices without mac_addresses intentionally have no wake target. */ -}}
+{{- $inventory := (onepasswordRead "op://clankers/device-inventory/notesPlain" | fromToml) -}}
+{{- $wakeTargets := list -}}
+{{- range $inventory.devices -}}
+{{-   $macAddresses := dig "mac_addresses" (list) . -}}
+{{-   if gt (len $macAddresses) 0 -}}
+{{-     $wakeTargets = append $wakeTargets (dict "name" .name "macAddress" (last $macAddresses)) -}}
+{{-   end -}}
+{{- end -}}
+{{- if gt (len $wakeTargets) 0 }}
+# Wake a known device using its final mac_addresses entry from device-inventory.
+wake() {
+  local machine="${1:-}"
+
+  if [ "$#" -ne 1 ]; then
+    printf 'Usage: wake <machine>\\nAvailable machines: {{ range $index, $target := $wakeTargets }}{{ if $index }}, {{ end }}{{ $target.name }}{{ end }}\\n' >&2
+    return 2
+  fi
+
+  if ! command -v wakeonlan >/dev/null 2>&1; then
+    printf 'wake: wakeonlan is not installed or not on PATH\\n' >&2
+    return 127
+  fi
+
+{{- range $wakeTargets }}
+  if [ "$machine" = {{ .name | quote }} ]; then
+    command wakeonlan {{ .macAddress | quote }}
+    return
+  fi
+{{- end }}
+
+  printf 'wake: unknown machine %s\\nAvailable machines: {{ range $index, $target := $wakeTargets }}{{ if $index }}, {{ end }}{{ $target.name }}{{ end }}\\n' "$machine" >&2
+  return 2
+}
+{{- end }}
+{{- end }}
+
 {{ if eq .host "homeserver" -}}
 # Docker compose (homeserver)
 alias dch="sudo docker compose -f /home/ankit/hroot/homeserver/docker-compose.yaml"
