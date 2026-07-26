@@ -84,13 +84,12 @@ esac
 # {{ end -}}
 # fi
 
-# ble.sh (bash line editor) — required for atuin's full bash integration.
-# Sourced with --noattach here; activated with ble-attach at the very end.
-if [ -f "$HOME/.local/share/blesh/ble.sh" ]; then
-  source "$HOME/.local/share/blesh/ble.sh" --noattach
-  # Don't print a "[ble: exit N]" line after every non-zero command.
-  bleopt exec_errexit_mark=
-fi
+# ble.sh (bash line editor) is disabled while diagnosing terminal latency.
+# if [ -f "$HOME/.local/share/blesh/ble.sh" ]; then
+#   source "$HOME/.local/share/blesh/ble.sh" --noattach
+#   # Don't print a "[ble: exit N]" line after every non-zero command.
+#   bleopt exec_errexit_mark=
+# fi
 
 # history
 shopt -s histappend
@@ -231,6 +230,9 @@ fi
 # Aliases (after PATH is built)
 [ -f "$HOME/.alias.sh" ] && source "$HOME/.alias.sh"
 
-# ble.sh redraws and hooks each command. It is opt-in while diagnosing terminal
-# latency; set BASH_ENABLE_BLESH=1 before starting Bash to re-enable it.
-[[ ${BASH_ENABLE_BLESH:-0} == 1 && ${BLE_VERSION-} ]] && ble-attach
+# Per-machine secrets, intentionally kept outside ChezMoi and Git.
+[ -f "$HOME/.secrets.sh" ] && source "$HOME/.secrets.sh"
+
+# ble.sh redraws and hooks each command. It remains disabled while diagnosing
+# terminal latency; uncomment after restoring the source block above.
+# [[ ${BASH_ENABLE_BLESH:-0} == 1 && ${BLE_VERSION-} ]] && ble-attach
