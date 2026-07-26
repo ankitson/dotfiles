@@ -29,7 +29,7 @@ def extract_nv_audio(input_file):
     try:
         # Run ffmpeg. We suppress the massive wall of text ffmpeg usually outputs 
         # to keep the terminal clean, but will catch errors if it fails.
-        subprocess.run(command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(command, check=True)
         
         print("Success! Created:")
         print(f"  🔊 {speaker_out}")
