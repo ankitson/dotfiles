@@ -45,6 +45,9 @@ export PATH={{ toStrings $paths | join ":" }}:$PATH
 {{ end -}}
 {{ end }}
 
+# Rust: load for both interactive shells and non-interactive login shells.
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+
 # If not running interactively, don't do anything
 case $- in
     *i*) ;;
@@ -187,9 +190,6 @@ export LD_LIBRARY_PATH="{{ .cudaPath }}/lib64${LD_LIBRARY_PATH:+:$LD_LIBRARY_PAT
 # Tool initialization
 # ======================
 
-# Rust
-[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
-
 # Completions
 {{ if lookPath "fzf" -}}
 export FZF_COMPLETION_TRIGGER='**'
@@ -228,6 +228,10 @@ fi
 if command -v atuin >/dev/null 2>&1; then
   eval "$(atuin init bash --disable-up-arrow)"
 fi
+
+# Per-machine PATH additions are isolated so the shared shell configuration
+# stays portable and local toolchain setup is easy to audit.
+[ -f "$HOME/.bashrc.local" ] && source "$HOME/.bashrc.local"
 
 # Aliases (after PATH is built)
 [ -f "$HOME/.alias.sh" ] && source "$HOME/.alias.sh"

@@ -1,0 +1,14 @@
+# Machine-local PATH additions managed by Chezmoi.
+
+# Linuxbrew is installed only on some Linux hosts.
+if [ -x /home/linuxbrew/.linuxbrew/bin/brew ]; then
+  eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"
+fi
+
+# Foundry installs its command-line tools outside the shared PATH block.
+if [ -d "$HOME/.foundry/bin" ]; then
+  case ":$PATH:" in
+    *":$HOME/.foundry/bin:"*) ;;
+    *) export PATH="$PATH:$HOME/.foundry/bin" ;;
+  esac
+fi

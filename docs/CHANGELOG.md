@@ -2,6 +2,12 @@
 
 ## 2026-07-26
 
+### Preserve group-write modes
+
+- Removed ChezMoi's global `umask = 0o022` policy so target files and
+  directories retain the source's group-write modes instead of generating
+  mode-only drift.
+
 ### Render Bash configuration on Windows mount points
 
 - Skip Unix PATH discovery while rendering `.bashrc` on Windows, where ChezMoi
