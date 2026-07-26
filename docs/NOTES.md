@@ -1,5 +1,79 @@
 # Chezmoi Dotfiles - Notes
 
+## 2026-07-26
+
+### Preserve modifier target extensions
+
+#### Discovery
+
+- The Windows-oriented `.json`, `.toml`, and `.yaml` interpreter mappings made
+  ChezMoi parse those target suffixes as script suffixes. The Pi modifier then
+  targeted `.pi/agent/settings` instead of `.pi/agent/settings.json`.
+
+#### Decision
+
+- Remove the target-extension interpreter mappings. The existing modifier
+  scripts retain their real target names; a distinct Windows execution
+  strategy is needed if those Python modifiers must run outside Unix-like
+  environments.
+
+#### Verification
+
+- Ran the authenticated full `chezmoi diff`; it reports
+  `.pi/agent/settings.json` and no extensionless Pi settings target.
+
+### Disable blesh while diagnosing terminal latency
+
+#### Decision
+
+- Keep blesh installed locally but comment out both the `ble.sh` source block
+  and `ble-attach`; also disable the external definition so ChezMoi will not
+  refresh it.
+
+#### Verification
+
+- Compared the live `.bashrc` with `chezmoi diff`. Its Java 21 path is already
+  automatically derived from the active Java installation; the remaining
+  Homebrew and Foundry differences are stale live-file drift, not source state
+  to import. `~/.secrets.sh` loading is deliberately restored as an optional,
+  cross-machine local-secret convention.
+
+### Wake devices from the shared inventory
+
+#### Decision
+
+- Generate `wake <machine>` in `.alias.sh` from
+  `op://clankers/device-inventory/notesPlain`. Devices without the optional
+  `mac_addresses` list are not exposed; for multiple addresses, use the final
+  list entry.
+- Invoke `wakeonlan` without a destination option so it uses its normal
+  broadcast default. The helper reports usage, unknown machines, and a missing
+  executable without sending a packet.
+
+#### Verification
+
+- Attempted to render `~/.alias.sh` and run `bash -n`; this host has no usable
+  non-interactive 1Password session, so the inventory read could not render.
+
+## 2026-07-21
+
+### Route Beads Linear sync per source workspace
+
+#### Decision
+
+- Make `bdh linear sync` run from each configured Beads workspace rather than
+  from the hydrated hub. The hub sync is restricted to its own `hroot-*`
+  issues so another repository's issues cannot be written to the hub's Linear
+  project.
+- Preserve the existing automatic Beads-project discovery and keep targeted
+  `--issues` syncs explicit through `bd -C <workspace>`.
+
+#### Verification
+
+- Rendered the managed alias file, passed `bash -n`, and ran the new function
+  with `bdh linear sync --dry-run` across the hub and every registered source
+  workspace.
+
 ## 2026-07-17
 
 ### Cache Pi live model catalogs before startup

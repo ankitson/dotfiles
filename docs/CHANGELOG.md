@@ -1,5 +1,42 @@
 # Changelog
 
+## 2026-07-26
+
+### Preserve ChezMoi modifier target extensions
+
+- Removed Python interpreter mappings for `.json`, `.toml`, and `.yaml`.
+  Those mappings caused ChezMoi to consume target-file extensions and render
+  extensionless modifier targets such as `.pi/agent/settings`.
+
+### Standardize local secrets loading
+
+- Restored conditional loading of `~/.secrets.sh` in the shared Bash template,
+  allowing every machine to provide local secrets without storing them in
+  ChezMoi or Git.
+
+### Disable blesh startup and external refresh
+
+- Commented out blesh loading and attachment in `.bashrc`, and disabled its
+  ChezMoi external archive entry while terminal latency is investigated.
+
+### Generate Wake-on-LAN shell targets from device inventory
+
+- Added a `wake <machine>` Bash helper to the managed aliases. It reads the
+  shared 1Password `device-inventory` during rendering and emits targets only
+  for devices with `mac_addresses`.
+- When a device has multiple MAC addresses, the helper sends the magic packet
+  to its final listed address using `wakeonlan`'s default broadcast behavior.
+
+## 2026-07-21
+
+### Sync Beads Linear projects per workspace
+
+- Updated `bdh linear sync` to synchronize each registered Beads workspace
+  independently, retaining its configured Linear project instead of syncing
+  the hydrated hub as one project.
+- Kept hub auto-discovery and added a guard for ambiguous cross-workspace
+  targeted syncs.
+
 ## 2026-07-17
 
 ### Cache-first Pi Bifrost and OpenCode model discovery
