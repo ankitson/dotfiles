@@ -45,16 +45,71 @@ alias nobuf="stdbuf -o0 "
 alias psudo='sudo env "PATH=$PATH" '
 
 {{- if lookPath "bd" }}
-# Cross-project Beads hub. Refresh hydrated project issues before every use;
-# plain project-local `bd` remains unchanged.
+# Cross-project Beads hub. Plain project-local `bd` remains unchanged.
+# Linear is synced from each source workspace so its issues stay in that
+# workspace's configured Linear project rather than the hydrated hub.
 bdh() {
+  local hub="$HOME/hroot/allplace/wiki"
+
+  # Auto-discover and register new beads projects (unless doing repo sync).
+  if [ "${1:-}" != "repo" ] || [ "${2:-}" != "sync" ]; then
+    local discover_cache="$hub/.beads/.bdh-discovery"
+
+    if [ -f "$discover_cache" ] && [ "$(( $(date +%s) - $(stat -c %Y "$discover_cache" 2>/dev/null || echo 0) ))" -lt 3600 ]; then
+      local last_time
+      last_time="$(stat -c '%y' "$discover_cache" 2>/dev/null | sed 's/\.[0-9]*//')"
+      echo "bdh: last discovery ${last_time}" >&2
+    else
+      echo "bdh: discovering new beads projects..." >&2
+
+      local configured
+      configured="$(grep -E '^\s+- "' "$hub/.beads/config.yaml" 2>/dev/null | sed 's/^\s*- "//;s/"$//')"
+
+      local dir
+      while IFS= read -r dir; do
+        if ! grep -Fxq "$dir" <<< "$configured" 2>/dev/null; then
+          command bd -C "$hub" repo add "$dir" -q 2>/dev/null || true
+        fi
+      done < <(fdfind -H -t d ".beads" "$HOME/hroot/projects" -x dirname {})
+
+      touch "$discover_cache"
+    fi
+  fi
+
+  # `bdh repo sync` — sync the hub repository itself (not the additional repos).
   if [ "${1:-}" = "repo" ] && [ "${2:-}" = "sync" ]; then
-    command bd -C "$HOME/hroot/allplace/wiki" "$@"
+    command bd -C "$hub" "$@"
     return
   fi
 
-  command bd -C "$HOME/hroot/allplace/wiki" repo sync || return
-  command bd -C "$HOME/hroot/allplace/wiki" "$@"
+  if [ "${1:-}" = "linear" ]; then
+    if [ "${2:-}" != "sync" ]; then
+      printf 'Use bdh linear sync [--pull|--push|...] to sync every Beads workspace.\n' >&2
+      return 2
+    fi
+    shift 2
+
+    # An explicit --issues selection is ambiguous across source workspaces.
+    for arg in "$@"; do
+      case "$arg" in --issues|--issues=*)
+        printf 'Run bd -C <workspace> linear sync --issues <ids> for a targeted sync.\n' >&2
+        return 2
+      esac
+    done
+
+    # The hub also holds hydrated foreign issues; only sync its own hroot-* IDs.
+    local hub_ids repo
+    hub_ids=$(command bd -C "$hub" list --all --limit 0 --json | python3 -c 'import json, sys; print(",".join(issue["id"] for issue in json.load(sys.stdin) if issue["id"].rsplit("-", 1)[0] == "hroot"))') || return
+    [ -z "$hub_ids" ] || command bd -C "$hub" linear sync --issues "$hub_ids" "$@" || return
+
+    while IFS= read -r repo; do
+      command bd -C "$repo" linear sync "$@" || return
+    done < <(command bd -C "$hub" repo list | awk '/^  - / { sub(/^  - /, ""); print }')
+    return
+  fi
+
+  command bd -C "$hub" repo sync || return
+  command bd -C "$hub" "$@"
 }
 {{- end }}
 
