@@ -1,3 +1,4 @@
 .opencode/agents/yolo.md
 .pi/agent/extensions/browser-tools.ts
 .pi/agent/extensions/devbox-tools.ts
+.pi/agent/extensions/litellm-live-models.ts

@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-08-06
+
+### Restore Pi live model discovery
+
+- Migrated the Bifrost and OpenCode discovery extensions from the removed
+  `context.store` API to Pi 0.84's `context.stored` and `context.publish` model
+  catalog contract.
+- Removed the stale auto-loaded LiteLLM extension through `.chezmoiremove`.
+- Verified `/model` refreshes successfully and persists all 1,241 Bifrost
+  models for offline use.
+
 ## 2026-07-26
 
 ### Preserve group-write modes

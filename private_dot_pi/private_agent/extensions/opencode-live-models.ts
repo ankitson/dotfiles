@@ -20,7 +20,7 @@ export default function (pi: ExtensionAPI) {
     api: "openai-completions",
     models: [toModel({ id: FALLBACK_MODEL_ID })],
     refreshModels: async (context) => {
-      const cached = await context.store.read();
+      const cached = context.stored;
       const cachedModels = cached?.models.filter((model) => model.provider === "opencode") ?? [];
       const fallback = cachedModels.length > 0 ? cachedModels : [toModel({ id: FALLBACK_MODEL_ID })];
       const stale = !cached?.checkedAt || Date.now() - cached.checkedAt >= CACHE_TTL_MS;
@@ -32,7 +32,7 @@ export default function (pi: ExtensionAPI) {
       try {
         const models = await fetchModels(context.signal);
         if (context.signal?.aborted || models.length === 0) return fallback;
-        await context.store.write({ models, checkedAt: Date.now() });
+        await context.publish({ persist: { models, checkedAt: Date.now() } });
         return models;
       } catch {
         return fallback;

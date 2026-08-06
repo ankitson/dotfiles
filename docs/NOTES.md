@@ -1,5 +1,34 @@
 # Chezmoi Dotfiles - Notes
 
+## 2026-08-06
+
+### Restore Pi live model discovery
+
+#### Discovery
+
+- Pi 0.84 removed the legacy provider refresh `context.store` helper. Both
+  local live-model extensions still called `context.store.read()` and
+  `context.store.write()`, so `/model` reported that the Bifrost and OpenCode
+  catalogs could not refresh. The same extensions still worked on a machine
+  running an older Pi API.
+- An unmanaged `~/.pi/agent/extensions/litellm-live-models.ts` was also still
+  auto-loading even though LiteLLM had already been replaced by Bifrost.
+
+#### Decision
+
+- Read the provider-scoped cache from `context.stored` and persist refreshed
+  models through generation-checked `context.publish()` calls.
+- Add the obsolete LiteLLM extension path to `.chezmoiremove` so it remains
+  absent across machines.
+
+#### Verification
+
+- Opened `/model` in a fresh Pi 0.84 session and observed `Model catalogs
+  refreshed.` with 1,303 configured models in the picker.
+- Confirmed the Bifrost store contains 1,241 models, including the virtual
+  `email-triage/main`, and that `pi --offline --list-models bifrost` returns
+  all 1,241 cached entries.
+
 ## 2026-07-26
 
 ### Preserve group-write modes
