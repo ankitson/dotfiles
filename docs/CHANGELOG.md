@@ -11,6 +11,12 @@
 - Verified `/model` refreshes successfully and persists all 1,241 Bifrost
   models for offline use.
 
+### Configure Omnigent Pi through Bifrost
+
+- Extended the Omnigent config merge hook with a Pi-scoped Bifrost gateway
+  provider, allowing `omni setup` and native Pi sessions to recognize the
+  existing gateway without changing Claude or Codex defaults.
+
 ## 2026-07-26
 
 ### Preserve group-write modes

@@ -29,6 +29,29 @@
   `email-triage/main`, and that `pi --offline --list-models bifrost` returns
   all 1,241 cached entries.
 
+### Configure Omnigent Pi through Bifrost
+
+#### Discovery
+
+- Omnigent does not inspect Pi's global `~/.pi/agent/settings.json`. Its setup
+  readiness and native Pi launcher resolve providers from
+  `~/.omnigent/config.yaml`, then render an isolated Pi configuration for the
+  launched session. Pi could therefore chat through its global Bifrost plugin
+  while `omni setup` still reported Pi as unconfigured.
+
+#### Decision
+
+- Extend the existing state-preserving Omnigent config hook to upsert a
+  `kind: gateway` Bifrost entry that serves the OpenAI chat-completions surface
+  and claims only the explicit `pi` default scope.
+- Keep the Claude and Codex subscription entries as their family defaults.
+
+#### Verification
+
+- Confirmed the hook is idempotent against a copy of the live Omnigent config.
+- Confirmed `omni config list` resolves Bifrost as Pi's default and `omni setup`
+  displays `Pi` as `Bifrost` with a configured checkmark.
+
 ## 2026-07-26
 
 ### Preserve group-write modes
