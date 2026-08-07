@@ -1,9 +1,15 @@
 #!/bin/sh
 
-[ -d /projects/toolbox/.git ] && exit 0
+{{- $toolboxDir := "/projects/toolbox" -}}
+{{- if eq .chezmoi.os "darwin" -}}
+{{-   $toolboxDir = joinPath .chezmoi.homeDir "projects/toolbox" -}}
+{{- end }}
+toolbox_dir={{ $toolboxDir | quote }}
 
-mkdir -p /projects
-git clone "https://github.com/ankitson/toolbox.git" /projects/toolbox || {
+[ -d "$toolbox_dir/.git" ] && exit 0
+
+mkdir -p "$(dirname "$toolbox_dir")"
+git clone "https://github.com/ankitson/toolbox.git" "$toolbox_dir" || {
   echo "chezmoi: failed to clone toolbox; continuing" >&2
   exit 0
 }

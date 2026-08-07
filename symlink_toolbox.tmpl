@@ -1,1 +1,5 @@
+{{- if eq .chezmoi.os "darwin" -}}
+{{ joinPath .chezmoi.homeDir "projects/toolbox" }}
+{{- else -}}
 /projects/toolbox
+{{- end }}

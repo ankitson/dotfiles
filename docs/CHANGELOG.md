@@ -2,6 +2,13 @@
 
 ## 2026-08-06
 
+### Use a user-owned toolbox clone on macOS
+
+- Changed the canonical macOS toolbox clone from `/projects/toolbox` to
+  `~/projects/toolbox`, while retaining `/projects/toolbox` on other systems.
+- Updated both `~/toolbox` and `~/.agents` to follow the platform-specific
+  canonical clone.
+
 ### Restore Pi live model discovery
 
 - Migrated the Bifrost and OpenCode discovery extensions from the removed
