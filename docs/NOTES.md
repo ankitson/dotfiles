@@ -1,5 +1,48 @@
 # Chezmoi Dotfiles - Notes
 
+## 2026-10-30
+
+### Keep slow Bifrost providers in Pi's model catalog
+
+#### Discovery
+
+- A Pi session started at 13:48 persisted a 695-model Bifrost catalog with no
+  `venice`, `nanogpt`, `nvidia`, `deepseek` or `lmstudio` models. The previous
+  catalog had 1,380.
+- Bifrost v2.4.0 builds the aggregate `/v1/models` response by polling each
+  provider with a fixed 5 s page deadline (`listAllModelsProviderTimeout` in
+  `core/bifrost.go`). A provider still running at the deadline is omitted with
+  no key status, so the response looks complete. Aggregate responses taking
+  5,001 ms were common, and one returned only 14 models.
+- `/v1/models?provider=<name>` uses the provider's own request timeout. It
+  returned all 140 Venice and 663 nanogpt models in under a second. For a
+  provider Bifrost has no config for, it returns HTTP 400 with `failed to get
+  config for provider`.
+
+#### Decision
+
+- Re-list each cached provider missing from the aggregate individually rather
+  than trusting the aggregate. Keep the cached models on any failure other than
+  "not configured", so rate limits (nanogpt returned 429 during testing) and
+  timeouts do not empty a provider.
+- A provider that is lost before any complete refresh is not recovered until
+  an aggregate response includes it, because recovery is driven by the cache.
+
+#### Verification
+
+- A harness that stripped `venice` and `nanogpt` from live aggregate responses
+  recovered both through per-provider requests, dropped an unconfigured
+  provider, and kept the cached models of an unreachable one. The previous
+  extension version returned neither provider.
+- A forced Pi refresh stored 1,614 Bifrost models, including 140 `venice/*`.
+
+#### Open issue
+
+- Bifrost v2.4.0 now answers `/api/governance/routing-rules` with HTTP 401
+  (`dashboard auth is not configured; send the setup token`). The extension
+  catches the error, so virtual models such as `email-triage/main` no longer
+  appear in Pi.
+
 ## 2026-10-01
 
 ### Move Pi to native MCP

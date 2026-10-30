@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-30
+
+### Keep slow Bifrost providers in Pi's model catalog
+
+- The Bifrost live-model extension now re-lists every previously cached
+  provider that is missing from Bifrost's aggregate `/v1/models` response
+  through `/v1/models?provider=<name>`. A provider that still fails keeps its
+  cached models; only one Bifrost reports as unconfigured is dropped.
+- Raised the extension's refresh budget from 15 s to 30 s to cover the
+  per-provider retries.
+
 ## 2026-10-21
 
 ### Unlock a locked GNOME keyring at login

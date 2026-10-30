@@ -14,7 +14,9 @@ const BIFROST_MODELS_URL = "https://bifrost.dev.ankitson.com/v1/models";
 // not exist in any physical provider's /v1/models response.
 const BIFROST_ROUTING_RULES_URL = "https://bifrost.dev.ankitson.com/api/governance/routing-rules?from_memory=true";
 const BIFROST_API_KEY = "sk-bifrost-local";
-const FETCH_TIMEOUT_MS = 15000;
+// Bounds the whole refresh, including per-provider retries. Refresh runs in
+// the background, so a generous budget costs nothing at startup.
+const FETCH_TIMEOUT_MS = 30000;
 const CACHE_TTL_MS = 4 * 60 * 60 * 1000;
 const DEFAULT_CONTEXT_WINDOW = 128000;
 const FALLBACK_MODEL_ID = "opencode-zen/deepseek-v4-flash-free";
@@ -66,7 +68,7 @@ export default function (pi: ExtensionAPI) {
       }
 
       try {
-        const models = await fetchModels(context.signal);
+        const models = await fetchModels(cachedModels, context.signal);
         if (context.signal?.aborted || models.length === 0) return fallback;
         await context.publish({ persist: { models, checkedAt: Date.now() } });
         return models;
@@ -85,7 +87,14 @@ export default function (pi: ExtensionAPI) {
   });
 }
 
-async function fetchModels(signal?: AbortSignal) {
+// Bifrost answers /v1/models by polling every provider with a hard 5s budget
+// per provider (listAllModelsProviderTimeout in core/bifrost.go) and silently
+// omits any provider still running at the deadline. Persisting that partial
+// list would wipe slow providers (venice, nanogpt, ...) from the picker until
+// the next refresh. So every provider in the previous catalog that is missing
+// from the aggregate is re-listed through /v1/models?provider=X, which uses
+// the provider's own request timeout instead of the 5s cap.
+async function fetchModels<T extends { id: string }>(cachedModels: T[], signal?: AbortSignal) {
   const controller = new AbortController();
   const abort = () => controller.abort();
   signal?.addEventListener("abort", abort, { once: true });
@@ -98,17 +107,56 @@ async function fetchModels(signal?: AbortSignal) {
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const list = (await res.json()) as ModelList;
-    const physicalModels = list.data;
+    const listed = new Set(list.data.map(model => providerOf(model.id)));
+    const missing = [...new Set(cachedModels.map(model => providerOf(model.id)))]
+      .filter(provider => !listed.has(provider));
+    const recovered = await Promise.all(missing.map(provider => fetchProviderModels(provider, controller.signal)));
+
+    const physicalModels = [...list.data];
+    const carriedOver: T[] = [];
+    missing.forEach((provider, i) => {
+      const result = recovered[i];
+      if (result.kind === "listed") physicalModels.push(...result.models);
+      // Still unreachable: keep its last known models rather than hiding a
+      // provider Bifrost can probably still route to.
+      else if (result.kind === "failed") carriedOver.push(...cachedModels.filter(model => providerOf(model.id) === provider));
+      // "not-configured": removed from Bifrost, or a virtual model prefix
+      // (re-added below from routing rules). Drop it.
+    });
     // Rule discovery is additive. A transient control-plane failure must not
     // hide physical models from the picker.
     const virtualModels = await fetchVirtualModels(signal).catch(() => []);
-    return mergeVirtualModels(physicalModels, virtualModels)
-      .map(toModel)
+    return [...mergeVirtualModels(physicalModels, virtualModels).map(toModel), ...carriedOver]
       .sort((a, b) => rank(a.id) - rank(b.id));
   } finally {
     clearTimeout(timer);
     signal?.removeEventListener("abort", abort);
   }
+}
+
+type ProviderListing =
+  | { kind: "listed"; models: ModelEntry[] }
+  | { kind: "not-configured" }
+  | { kind: "failed" };
+
+async function fetchProviderModels(provider: string, signal: AbortSignal): Promise<ProviderListing> {
+  try {
+    const url = `${BIFROST_MODELS_URL}?provider=${encodeURIComponent(provider)}`;
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${BIFROST_API_KEY}` }, signal });
+    const body = (await res.json().catch(() => ({}))) as Partial<ModelList> & { error?: { message?: string } };
+    if (res.ok && body.data && body.data.length > 0) return { kind: "listed", models: body.data };
+    // Bifrost's wording for a provider it has no config for.
+    if (res.status === 400 && /failed to get config for provider/.test(body.error?.message ?? "")) {
+      return { kind: "not-configured" };
+    }
+    return { kind: "failed" };
+  } catch {
+    return { kind: "failed" };
+  }
+}
+
+function providerOf(id: string): string {
+  return id.split("/", 1)[0];
 }
 
 async function fetchVirtualModels(signal?: AbortSignal): Promise<Array<{ id: string; targetModel?: string }>> {
