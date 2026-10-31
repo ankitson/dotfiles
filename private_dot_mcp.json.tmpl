@@ -1,10 +1,13 @@
+{{- /* desktop-win (the only Windows host) gets a token without fastmail. */}}
+{{- $tokenRef := "op://clankers/mcpproxy-agents/password" }}
+{{- if eq .chezmoi.os "windows" }}{{ $tokenRef = "op://clankers/mcpproxy-agents/desktop-win-lowpriv" }}{{ end }}
 {
   "mcpServers": {
     "mcpproxy": {
       "type": "http",
       "url": {{ .mcpproxy_gateway_url | quote }},
       "headers": {
-        "Authorization": {{ printf "Bearer %s" (onepasswordRead "op://clankers/mcpproxy-agents/password") | quote }}
+        "Authorization": {{ printf "Bearer %s" (onepasswordRead $tokenRef) | quote }}
       }
     }
   }
