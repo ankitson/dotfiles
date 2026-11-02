@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-01
+
+### Move Pi to native MCP
+
+- Converted `~/.pi/agent/mcp.json` to Pi's native MCP format and removed the
+  `pi-mcp-adapter` package.
+
 ## 2026-08-06
 
 ### Use a user-owned toolbox clone on macOS

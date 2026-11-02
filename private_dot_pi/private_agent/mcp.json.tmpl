@@ -1,10 +1,17 @@
+{{/*
+  Pi's native MCP config (pi >= 0.99). mcpproxy is already a tool-discovery
+  layer (retrieve_tools -> call_tool_*), so its handful of meta-tools are
+  declared directly instead of going through codemode/tool_search.
+*/ -}}
 {
   "mcpServers": {
     "mcpproxy": {
       "url": {{ .mcpproxy_gateway_url | quote }},
-      "auth": "bearer",
-      "bearerToken": {{ onepasswordRead "op://clankers/mcpproxy-agents/password" | quote }},
-      "lifecycle": "eager"
+      "headers": {
+        "Authorization": {{ printf "Bearer %s" (onepasswordRead "op://clankers/mcpproxy-agents/password") | quote }}
+      },
+      "description": "MCPProxy gateway: find upstream tools with retrieve_tools, then run them with call_tool_read/write/destructive",
+      "exposure": "direct"
     }
   }
 }

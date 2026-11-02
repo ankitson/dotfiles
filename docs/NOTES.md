@@ -1,5 +1,30 @@
 # Chezmoi Dotfiles - Notes
 
+## 2026-10-01
+
+### Move Pi to native MCP
+
+#### Discovery
+
+- Pi 0.99 added native MCP (`~/.pi/agent/mcp.json`, `/mcp`, `pi mcp list`).
+  The `pi-mcp-adapter` config keys (`auth: "bearer"`, `bearerToken`,
+  `lifecycle`) are invalid there: `pi mcp list` rejected the server with
+  `auth.provider must be a provider name`.
+
+#### Decision
+
+- Rewrote `mcp.json` in the native shape: bearer token in an `Authorization`
+  header, `exposure: "direct"` because mcpproxy is already a tool-discovery
+  layer and only exposes ~10 meta-tools. Dropped `npm:pi-mcp-adapter`, since
+  any extension that registers `/mcp` disables Pi's built-in MCP support.
+
+#### Verification
+
+- In an isolated `PI_CODING_AGENT_DIR`, `pi mcp list` reported
+  `mcpproxy: connected, 10 tools (direct, global)`, and a `pi -p` run called
+  `mcp__mcpproxy__upstream_servers` successfully. `pi --list-models` still
+  listed 1283 bifrost and 78 opencode models.
+
 ## 2026-08-06
 
 ### Restore Pi live model discovery
