@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-21
+
+### Unlock a locked GNOME keyring at login
+
+- On Linux, interactive shells check the login keyring over D-Bus and prompt
+  for its password only when it is positively locked, since a locked keyring
+  makes libsecret-backed CLIs (`td`, `gh`, `docker login`) hang silently.
+- Added `keyring-is-locked` and `unlock-keyring [--force]`; set
+  `KEYRING_NO_AUTO_UNLOCK=1` to skip the login prompt.
+
 ## 2026-10-01
 
 ### Move Pi to native MCP

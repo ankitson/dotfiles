@@ -164,6 +164,66 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 # File lives outside chezmoi/git per-machine — see ~/toolbox/skills/1password-cli/SKILL.md.
 [ -f ~/.config/op/service-account.env ] && . ~/.config/op/service-account.env
 
+{{ if eq .chezmoi.os "linux" -}}
+# ------------------------------------------------------------
+# GNOME keyring
+#
+# A LOCKED login keyring makes any libsecret-backed CLI (td, gh, aws,
+# docker login, keytar apps) block forever: they hit a Secret Service unlock
+# prompt the terminal cannot answer, with no timeout and no error. The symptom
+# is a spinner that never resolves on *every* subcommand.
+# See allplace/wiki/engineering/cli-hangs-on-locked-os-keyring.md
+#
+# Escape hatch: export KEYRING_NO_AUTO_UNLOCK=1 to stop the login prompt.
+# ------------------------------------------------------------
+
+# Succeeds only when we can positively confirm the login keyring is locked.
+# "Unlocked", "no keyring", and "cannot tell" all return non-zero, so an
+# unreachable or wedged Secret Service never triggers a password prompt.
+keyring-is-locked() {
+  [ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ] || return 1
+  command -v gdbus >/dev/null 2>&1 || return 1
+
+  local locked
+  locked=$(timeout 5 gdbus call --session \
+    --dest org.freedesktop.secrets \
+    --object-path /org/freedesktop/secrets/collection/login \
+    --method org.freedesktop.DBus.Properties.Get \
+    org.freedesktop.Secret.Collection Locked 2>/dev/null) || return 1
+
+  [[ $locked == *true* ]]
+}
+
+# Unlock the login keyring. No-op when it is already unlocked; pass --force to
+# prompt anyway (e.g. to restart the daemon after it was replaced).
+unlock-keyring() {
+  if [ "${1:-}" != "--force" ] && ! keyring-is-locked; then
+    echo "keyring: already unlocked"
+    return 0
+  fi
+
+  local pass
+  read -rsp "Unlock login keyring (empty to skip) - Password: " pass
+  echo
+  if [ -z "$pass" ]; then
+    echo "keyring: skipped, still locked"
+    return 1
+  fi
+
+  export $(printf '%s' "$pass" | gnome-keyring-daemon --replace --unlock)
+  unset pass
+}
+
+# Prompt at login only when the keyring is actually locked and a human is
+# present to type. Non-interactive shells already returned above; the -t 0 test
+# additionally keeps this from blocking a shell with no terminal attached.
+if [ -t 0 ] && [ -z "${KEYRING_NO_AUTO_UNLOCK:-}" ] \
+   && command -v gnome-keyring-daemon >/dev/null 2>&1 \
+   && keyring-is-locked; then
+  unlock-keyring
+fi
+{{ end -}}
+
 {{ if lookPath "nvim" -}}
 export EDITOR=nvim
 {{ else -}}
